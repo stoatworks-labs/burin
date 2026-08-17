@@ -34,6 +34,13 @@ re-rasterised at the size being shown. The drawing is
 `tools/make_example_svg.py`; both frames rendered by `burintest`, the offline
 harness.</sub>
 
+**Try it in your browser, with your own SVG:**
+[burin.stoatworks-labs.com](https://burin.stoatworks-labs.com) — the plugin's own
+scale ladder, reveal timing and style selection in the browser. Nothing is
+uploaded.
+
+**Video:** [What it does, in 50 seconds](https://www.youtube.com/watch?v=7LqRVcUemkQ)
+
 <!-- downloads:start -->
 
 ## Download
