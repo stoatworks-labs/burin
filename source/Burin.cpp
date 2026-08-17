@@ -357,7 +357,7 @@ bool BurinPlugin::LoadDocumentString( const std::string& text, const std::string
 	loadedPath_   = name;
 
 	Document fresh;
-	const bool ok = fresh.LoadString( text, name );
+	const bool ok = fresh.LoadText( text, name );
 	if( ok )
 		document_ = std::move( fresh );
 	return ok;

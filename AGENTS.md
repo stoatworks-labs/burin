@@ -118,6 +118,17 @@ three texels so there is a transparent border for the rule to meet, and the two
 together make the join continuous. Both `Compose.cpp` and `Shaders.cpp` carry the
 bounds test; removing it from either is a wash of colour in that build only.
 
+**`windows.h` claims ordinary-looking method names, and the result is a LINK
+error.** `Document::LoadText` is called that because `LoadString` is a macro
+expanding to `LoadStringA`/`LoadStringW`. Translation units that reach windows.h
+through the FFGL SDK then call `Document::LoadStringA` while `Document.cpp`
+compiles `Document::LoadString`, and the linker reports an unresolved symbol
+carrying a suffix nobody wrote. **It cannot reproduce on macOS or Linux**, so
+`verify.sh` cannot catch it and CI is the only proof — as it was, on the first
+tag of this repo. Avoid `LoadString`, `LoadImage`, `LoadIcon`, `DrawText`,
+`GetObject`, `SendMessage`, `CreateFile`, `DeleteFile`, `CopyFile`,
+`Rectangle`, `Ellipse`, `Polygon` and `GetCurrentTime` in any public API here.
+
 **A wrapper header must not differ from the library it wraps only by case.**
 `source/SvgLib.h` was called `NanoSVG.h` for about an hour. On a case-insensitive
 filesystem — which is to say on a Mac — `#include "nanosvg.h"` from a file called

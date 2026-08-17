@@ -303,7 +303,7 @@ int TestCrisp( bool writeImages )
 	std::printf( "crisp — the central claim, measured\n" );
 
 	Document doc;
-	if( !doc.LoadString( kEdgeSvg, "edge.svg" ) )
+	if( !doc.LoadText( kEdgeSvg, "edge.svg" ) )
 	{
 		Check( false, "built-in edge document loads" );
 		return 1;
@@ -406,7 +406,7 @@ int TestRebuilds()
 	std::printf( "rebuilds — the ladder has to be seldom as well as sharp\n" );
 
 	Document doc;
-	doc.LoadString( kStyleSvg, "style.svg" );
+	doc.LoadText( kStyleSvg, "style.svg" );
 
 	// A zoom sweep of six octaves. Half-octave rungs means twelve rebuilds and
 	// change; anything near the frame count means the cache is not working.
@@ -473,7 +473,7 @@ int TestStyle()
 	std::printf( "style — fill and stroke are separated exactly\n" );
 
 	Document doc;
-	doc.LoadString( kStyleSvg, "style.svg" );
+	doc.LoadText( kStyleSvg, "style.svg" );
 	Check( doc.ShapeCount() == 3, "the style document has three shapes" );
 
 	Rasteriser rast;
@@ -559,7 +559,7 @@ int TestReveal()
 
 	// --- measured off the picture -----------------------------------------
 	Document doc;
-	doc.LoadString( kLineSvg, "line.svg" );
+	doc.LoadText( kLineSvg, "line.svg" );
 
 	Rasteriser rast;
 	RevealPlan plan;
@@ -689,7 +689,7 @@ int TestMotion()
 int TestDoc( const std::string& path )
 {
 	Document doc;
-	const bool ok = path.empty() ? doc.LoadString( kStyleSvg, "built-in" ) : doc.LoadFile( path );
+	const bool ok = path.empty() ? doc.LoadText( kStyleSvg, "built-in" ) : doc.LoadFile( path );
 
 	std::printf( "%s\n", doc.Note().c_str() );
 	if( !ok )
@@ -714,7 +714,7 @@ int TestCost( const std::string& path )
 	std::printf( "cost — what a rebuild actually costs on this file\n" );
 
 	Document doc;
-	if( !( path.empty() ? doc.LoadString( kStyleSvg, "built-in" ) : doc.LoadFile( path ) ) )
+	if( !( path.empty() ? doc.LoadText( kStyleSvg, "built-in" ) : doc.LoadFile( path ) ) )
 	{
 		std::printf( "  %s\n", doc.Note().c_str() );
 		return 1;
@@ -777,7 +777,7 @@ int TestCost( const std::string& path )
 int TestRender( const std::string& path, const std::string& out, float zoom, float progress )
 {
 	Document doc;
-	if( !( path.empty() ? doc.LoadString( kStyleSvg, "built-in" ) : doc.LoadFile( path ) ) )
+	if( !( path.empty() ? doc.LoadText( kStyleSvg, "built-in" ) : doc.LoadFile( path ) ) )
 	{
 		std::printf( "%s\n", doc.Note().c_str() );
 		return 1;

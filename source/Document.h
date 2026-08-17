@@ -171,7 +171,23 @@ public:
 	/// writes into the buffer it is given — it null-terminates attribute values
 	/// in place — so handing it a caller's string would corrupt it. This is the
 	/// entry point the harness and the OFX build use.
-	bool LoadString( const std::string& text, const std::string& name );
+	///
+	/// **Called LoadText and not the obvious LoadString, because `LoadString`
+	/// is a macro in `windows.h`** — it expands to `LoadStringA` or
+	/// `LoadStringW` depending on `UNICODE`. The effect is a link error and not
+	/// a compile error, which makes it much harder to read than it sounds:
+	/// translation units that pull in windows.h through the FFGL SDK call
+	/// `Document::LoadStringA`, this file compiles `Document::LoadString`, and
+	/// the linker reports an unresolved symbol whose name contains a suffix
+	/// nobody wrote. It cannot happen on macOS or Linux at all, so **CI is the
+	/// only thing that can catch it** — as it did, on the first tag.
+	///
+	/// The general rule for this repo's public API: avoid any name that
+	/// `windows.h` claims. The usual suspects are `LoadString`, `LoadImage`,
+	/// `LoadIcon`, `DrawText`, `GetObject`, `SendMessage`, `CreateFile`,
+	/// `DeleteFile`, `CopyFile`, `Rectangle`, `Ellipse`, `Polygon` and
+	/// `GetCurrentTime`.
+	bool LoadText( const std::string& text, const std::string& name );
 
 	bool Valid() const { return image_ != nullptr && !shapes_.empty(); }
 

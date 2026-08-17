@@ -210,10 +210,10 @@ bool Document::LoadFile( const std::string& path )
 		return false;
 	}
 
-	return LoadString( text, path );
+	return LoadText( text, path );
 }
 
-bool Document::LoadString( const std::string& text, const std::string& name )
+bool Document::LoadText( const std::string& text, const std::string& name )
 {
 	Release();
 	note_.clear();
