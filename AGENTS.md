@@ -248,11 +248,29 @@ The OFX build is smoke-tested with `ofxprobe` from
 [resolume-ofx-bridge](https://github.com/stoatworks-labs/resolume-ofx-bridge).
 
 **Host verification is Allan's, not an agent's.** Driving the Resolume GUI from a
-session is unreliable. **Nothing in this repo has been loaded into Resolume or
-Resolve yet**, and these are worth checking there first:
+session is unreliable.
+
+**Both FFGL plugins load and render in Resolume Arena** — confirmed 2026-08-17,
+after the v0.1.0 release. Be precise about what that does and does not settle:
+it establishes that the bundles load, that the plugin registers, that `InitGL`
+and `ProcessOpenGL` survive a real host's call sequence, and that a drawing
+appears. It is **not** a sweep of the controls in a live host, and the questions
+below were not part of it.
+
+**The OpenFX build has still not been loaded into Resolve, Nuke or Natron.** It
+builds, exports `OfxGetPlugin` and passes the signing checks in `verify.sh`,
+which is exactly as far as flipbook's got before release too. A generator's
+`render` in particular runs only in a real host — `ofxprobe` drives the Filter
+context only.
+
+Still worth checking, and unaffected by the Arena confirmation:
 
 - **Whether Resolume honours `FF_TYPE_INTEGER` with a range** on First Shape and
-  Shape Count. Structurally right, empirically unproven, same as flipbook.
+  Shape Count. Structurally right, empirically unproven, same as flipbook — and
+  a plugin that loads and draws would look identical either way, because the
+  fallback is a working control with the wrong widget rather than a broken one.
+  If it comes out as a 0..1 slider the fix is conversions in `Controls.cpp` and
+  nothing else changes.
 - **Whether the file picker offers `.svg`** and what it does with a path that no
   longer resolves. The plugin deliberately keeps the *previous* drawing on screen
   rather than blanking when a reload fails — a blank frame mid-show is worse than

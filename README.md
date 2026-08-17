@@ -8,9 +8,10 @@
 > pixels, and requires it to stay at one pixel from 1× to 32×. It then repeats
 > the measurement against the same code with the rebuild removed, and requires
 > *that* to blow up to 25 pixels, so the result is a comparison rather than a
-> restatement (see [Status](#status)). It has **never been loaded into Resolume
-> or Resolve** — only compiled, rendered and measured offline. Check it in your
-> own rig before trusting it in a show.
+> restatement (see [Status](#status)). Both FFGL plugins **load and render in
+> Resolume Arena**, confirmed by the author; the OpenFX build has **not** been
+> loaded into Resolve, Nuke or Natron. Check it in your own rig before trusting
+> it in a show.
 
 Vector artwork for [Resolume](https://resolume.com) Arena and Avenue, as a pair
 of FFGL plugins — and the same thing again as an OpenFX plugin for Resolve,
@@ -52,9 +53,9 @@ uploaded.
 
 | Build | Download | Size |
 | --- | --- | --- |
-| Universal (Apple Silicon + Intel) · .dmg disk image | [`burin-0.1.0-macos-universal.dmg`](https://github.com/stoatworks-labs/burin/releases/download/v0.1.0/burin-0.1.0-macos-universal.dmg) | 873 KB |
-| Universal (Apple Silicon + Intel) · .zip archive | [`burin-macos-universal.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-macos-universal.zip) | 521 KB |
-| Universal (Apple Silicon + Intel) · .zip archive (OpenFX — Resolve, Vegas, Nuke) | [`burin-ofx-macos-universal.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-ofx-macos-universal.zip) | 333 KB |
+| Universal (Apple Silicon + Intel) · .dmg disk image | [`burin-0.1.0-macos-universal.dmg`](https://github.com/stoatworks-labs/burin/releases/download/v0.1.0/burin-0.1.0-macos-universal.dmg) | 906 KB |
+| Universal (Apple Silicon + Intel) · .zip archive | [`burin-macos-universal.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-macos-universal.zip) | 560 KB |
+| Universal (Apple Silicon + Intel) · .zip archive (OpenFX — Resolve, Vegas, Nuke) | [`burin-ofx-macos-universal.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-ofx-macos-universal.zip) | 346 KB |
 
 </details>
 
@@ -218,10 +219,17 @@ mode for keyframing Phase against the edit.
 
 ## Status
 
-**Verified offline. Never loaded into Resolume or Resolve.**
+**Runs in Resolume Arena. The OpenFX build has not been loaded into a host.**
 
-`tools/verify.sh` runs everything, including the two traps that otherwise only
-surface in a release job after a tag. What the measurements actually establish:
+Both FFGL plugins load and render in Arena — confirmed by the author after
+release. That is "it loads and it draws"; it is not a sweep of every control in
+a live host, and the open questions further down are still open. The OpenFX
+bundle builds, exports `OfxGetPlugin` and passes the release-time signing
+checks, but has not been opened in Resolve, Nuke or Natron.
+
+Everything else below is measured offline. `tools/verify.sh` runs it, including
+the two traps that otherwise only surface in a release job after a tag. What the
+measurements actually establish:
 
 - **Sharpness across zoom**, with its own control. A hard edge measures 1.0 px of
   alpha transition at 1×, 2×, 4×, 8×, 16× and 32×. The same raster left
@@ -256,11 +264,12 @@ Only the rasterise column is paid in Resolume — the composite is a shader ther
 and only on a **rebuild**. Detail below 1× is the lever if a heavy drawing costs
 too much at 4K.
 
-Worth checking in a real host first: whether Resolume renders the two integer
-parameters as typed spinners, whether the file picker behaves with a path that no
-longer resolves (the plugin keeps the previous drawing on screen rather than
-blanking, and says so only in the log), and whether the twice-an-octave rebuild
-during a continuous zoom is visible in a room.
+Still open even in Arena, because loading and drawing does not answer them:
+whether Resolume renders the two integer parameters as typed spinners or falls
+back to 0..1 sliders, whether the file picker behaves with a path that no longer
+resolves (the plugin keeps the previous drawing on screen rather than blanking,
+and says so only in the log), and whether the twice-an-octave rebuild during a
+continuous zoom is visible in a room.
 
 ## Diagnostics
 
