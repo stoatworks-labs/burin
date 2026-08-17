@@ -1,0 +1,126 @@
+# The project video. Every frame is the real plugin rendering through the real
+# FFGL sequence — this is the generator being *operated*, not a mock-up.
+#
+#   ./build/burintest --sequence /tmp/burin-a --script tools/video.cues \
+#                     --file docs/example-plate.svg --size 1920x1080 \
+#                     --seconds 42 --fps 30
+#
+# Syntax: `T Name=V` sets at a time, `T1..T2 Name=V1..V2` ramps between two
+# (eased, because a parameter that starts and stops abruptly reads as a cut).
+#
+# Continuous values are the 0..1 the host sees, not the physical quantity — see
+# Controls.h for why there is no other kind. Counts and dropdowns hold their
+# real value.
+#
+# ## The order is the order of the argument
+#
+# The hard part of pitching this plugin is that its central claim is invisible
+# in a still. "Sharp at any size" is not a look; it is the *absence* of an
+# artefact, and an audience cannot see an absence unless they have just been
+# shown the thing it replaces. So the film opens by going somewhere a bitmap
+# cannot follow and staying there long enough to be believed, and only then
+# moves on to the things that are visible in a frame.
+#
+# Then, in order: that the paths are still separate (stroke and fill), that they
+# have length (the write-on), that they can be addressed individually (stagger,
+# order, colour walk), and finally that all of it moves on a clock.
+
+# ------------------------------------------------ 0s: the whole drawing, at rest
+# Paper, black ink, fitted to its own content. No motion at all for two seconds:
+# the eye needs a reference frame before it can be told anything has changed,
+# and this is also the frame the thumbnail is cut from.
+0.0    Background Opacity=1.0
+0.0    Background=0.97
+0.0    Background_Green=0.96
+0.0    Background_Blue=0.93
+0.0    Bounds=1
+0.0    Fit=0
+0.0    Zoom=0.5
+0.0    Detail=0.5
+0.0    Min Stroke px=0.28
+0.0    Sync=0
+0.0    Rate=0.30
+0.0    Wave=0
+
+# ------------------------------------------- 2.5s: in, past where a bitmap dies
+# Six seconds of continuous zoom to about 12x. Slow on purpose. The point is not
+# the destination but that nothing softens on the way — a cut straight to the
+# close-up would be indistinguishable from a second, larger export.
+#
+# The ladder crosses about seven rungs across this ramp, so seven rebuilds
+# happen while it plays. If any of them is visible as a hitch, this is the shot
+# that will show it, which is the other reason it is here and this long.
+2.5..8.5    Zoom=0.5..0.79
+3.0..8.5    Position X=0.5..0.545
+3.0..8.5    Position Y=0.5..0.470
+
+# Hold at the bottom of the dive. The centre scale is drawn at 0.4 units of
+# stroke — sub-pixel at 1:1 — and here it is a clean line. That is the whole
+# argument, and it needs a beat to land.
+8.5..11.0   Zoom=0.79..0.79
+
+# --------------------------------------------------- 11s: back out, still clean
+11.0..14.0  Zoom=0.79..0.5
+11.0..14.0  Position X=0.545..0.5
+11.0..14.0  Position Y=0.470..0.5
+
+# ------------------------------------------ 14s: the paths are still separate
+# Fill only, then stroke only. On this drawing the difference is stark: the
+# cardinal arrows and the star points are fill-with-no-stroke and vanish under
+# Stroke Only, while everything else is stroke-with-no-fill and vanishes under
+# Fill Only. Two genuinely different pictures out of one file, and neither is an
+# edge detect.
+14.0   Draw=1
+16.5   Draw=2
+16.5   Min Stroke px=0.42
+
+# ---------------------------------------------- 19s: they also have a LENGTH
+# The write-on. Held rather than clock-driven, so the cue sheet controls it
+# exactly and it lands where the cut wants it. Ordered longest-first, so the
+# rings and the long arcs arrive before the degree ticks — the drawing builds
+# structure first and detail last, which is the order somebody would draw it in.
+19.0   Reveal=3
+19.0   Order=2
+19.0   Stagger=0.52
+19.0   Fill Fade=0.4
+19.0   Progress=0.0
+19.0..27.0  Progress=0.0..1.0
+
+# ------------------------------------------- 27s: addressed one shape at a time
+# The colour walk, applied to strokes only, spread across the drawing so the
+# hue moves shape by shape rather than washing the whole thing one colour.
+27.0   Recolour=2
+27.0   Colour=0.20
+27.0   Colour_Green=0.55
+27.0   Colour_Blue=1.0
+27.0..30.0  Colour Spread=0.5..0.80
+
+# Isolate: the same drawing reduced to a slice of itself and brought back. This
+# is the control that is hardest to explain in text and instant on screen.
+30.0   First Shape=7
+30.0..33.0  Shape Count=8..464
+
+# ------------------------------------------------ 33s: and all of it moves
+# Back to the file's own colours on the dark ground, with the motion running:
+# a slow breath on the zoom and a drift, both on the same clock, the two drift
+# axes a quarter cycle apart so it wanders rather than sliding on a diagonal.
+33.0   Recolour=3
+33.0   Colour=0.55
+33.0   Colour_Green=0.82
+33.0   Colour_Blue=1.0
+33.0   Colour Spread=0.62
+33.0   Background=0.03
+33.0   Background_Green=0.07
+33.0   Background_Blue=0.16
+33.0   Rate=0.34
+33.0..35.0  Zoom Move=0.0..0.30
+33.0..35.0  Drift X=0.0..0.22
+33.0..35.0  Drift Y=0.0..0.16
+33.0..36.0  Spin=0.5..0.545
+
+# The reveal runs again underneath the motion, this time scattered, so the last
+# ten seconds are the plugin doing several things at once — which is what it
+# actually looks like in use, and the only honest way to end.
+36.0   Order=4
+36.0   Stagger=0.42
+36.0..41.5  Progress=0.15..1.0

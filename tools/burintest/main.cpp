@@ -34,6 +34,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <map>
 #include <string>
 #include <vector>
 #include <zlib.h>
@@ -1169,6 +1170,209 @@ int RenderThroughPlugin( const std::string& svgPath, const std::string& out,
 	return 0;
 }
 
+//---------------------------------------------------------------------------
+// --sequence
+//---------------------------------------------------------------------------
+//
+// A cue sheet, so the project video is the real plugin being *operated* rather
+// than a mock-up or a screen recording:
+//
+//     12.0        Draw=2               set at a time
+//     4.0..9.0    Zoom=0.5..0.82       ramp between two times
+//
+// Times are seconds on the video's own clock, which is also the host clock
+// handed to the plugin — so a cue at 12s is the frame you see at 12s.
+//
+// The clock is deliberately NOT pinned beyond that. The plugin free-runs off
+// the host clock exactly as it does in Resolume, which is the only way footage
+// can honestly show Rate, Wave and the reveal doing anything.
+//
+struct Cue
+{
+	double from = 0.0;
+	double to   = 0.0;
+	std::string name;
+	float first  = 0.0f;
+	float second = 0.0f;
+	bool ramp    = false;
+};
+
+bool ParseCues( const std::string& path, std::vector< Cue >& cues )
+{
+	std::FILE* file = std::fopen( path.c_str(), "rb" );
+	if( file == nullptr )
+	{
+		std::fprintf( stderr, "cannot open cue sheet %s\n", path.c_str() );
+		return false;
+	}
+
+	char line[ 1024 ];
+	int number = 0;
+	while( std::fgets( line, sizeof( line ), file ) != nullptr )
+	{
+		++number;
+		std::string text = line;
+
+		const size_t hash = text.find( '#' );
+		if( hash != std::string::npos )
+			text = text.substr( 0, hash );
+
+		const size_t firstReal = text.find_first_not_of( " \t\r\n" );
+		if( firstReal == std::string::npos )
+			continue;
+		text = text.substr( firstReal );
+
+		const size_t split = text.find_first_of( " \t" );
+		if( split == std::string::npos )
+			continue;
+
+		const std::string when = text.substr( 0, split );
+		std::string assignment = text.substr( split );
+
+		const size_t assignStart = assignment.find_first_not_of( " \t" );
+		if( assignStart == std::string::npos )
+			continue;
+		assignment = assignment.substr( assignStart );
+		while( !assignment.empty() && std::strchr( " \t\r\n", assignment.back() ) != nullptr )
+			assignment.pop_back();
+
+		Cue cue;
+		const size_t timeRange = when.find( ".." );
+		if( timeRange != std::string::npos )
+		{
+			cue.from = std::strtod( when.substr( 0, timeRange ).c_str(), nullptr );
+			cue.to   = std::strtod( when.substr( timeRange + 2 ).c_str(), nullptr );
+			cue.ramp = true;
+		}
+		else
+		{
+			cue.from = cue.to = std::strtod( when.c_str(), nullptr );
+		}
+
+		const size_t equals = assignment.find( '=' );
+		if( equals == std::string::npos )
+		{
+			std::fprintf( stderr, "%s:%d: expected Name=value\n", path.c_str(), number );
+			std::fclose( file );
+			return false;
+		}
+
+		cue.name                = assignment.substr( 0, equals );
+		const std::string value = assignment.substr( equals + 1 );
+
+		const size_t valueRange = value.find( ".." );
+		if( cue.ramp && valueRange != std::string::npos )
+		{
+			cue.first  = std::strtof( value.substr( 0, valueRange ).c_str(), nullptr );
+			cue.second = std::strtof( value.substr( valueRange + 2 ).c_str(), nullptr );
+		}
+		else
+		{
+			cue.first = cue.second = std::strtof( value.c_str(), nullptr );
+			cue.ramp  = false;
+		}
+
+		cues.push_back( cue );
+	}
+
+	std::fclose( file );
+	return true;
+}
+
+int RenderSequence( const std::string& directory, const std::string& cuePath,
+                    const std::string& svgPath, int width, int height,
+                    double seconds, double fps )
+{
+	std::vector< Cue > cues;
+	if( !cuePath.empty() && !ParseCues( cuePath, cues ) )
+		return 1;
+
+	CGLContextObj context = CreateContext();
+	if( context == nullptr )
+	{
+		std::fprintf( stderr, "no GL context\n" );
+		return 1;
+	}
+
+	BurinPlugin plugin( false );
+	if( svgPath.empty() )
+		plugin.LoadDocumentString( kStyleSvg, "built-in" );
+	else
+		plugin.SetTextParameter( PT_FILE, svgPath.c_str() );
+
+	// Every cue is checked against the real parameter list before a single
+	// frame is rendered. A typo in a name would otherwise be a cue that
+	// silently never fires, and the only symptom would be a video that is
+	// subtly less interesting than the sheet says it is — discovered after the
+	// whole render.
+	std::map< std::string, unsigned int > byName;
+	for( unsigned int id = 0; id < plugin.GetNumParams(); ++id )
+	{
+		const char* n = plugin.GetParamName( id );
+		if( n != nullptr )
+			byName[ n ] = id;
+	}
+	for( const Cue& cue : cues )
+	{
+		if( byName.find( cue.name ) == byName.end() )
+		{
+			std::fprintf( stderr, "cue names '%s', which is not a parameter\n", cue.name.c_str() );
+			return 1;
+		}
+	}
+
+	Target target   = MakeTarget( width, height );
+	const int frames = static_cast< int >( seconds * fps + 0.5 );
+
+	for( int frame = 0; frame < frames; ++frame )
+	{
+		const double now = static_cast< double >( frame ) / fps;
+
+		// Applied in file order every frame rather than tracked as state, so a
+		// later cue on the same parameter simply wins — which is what reading
+		// the sheet top to bottom would lead you to expect.
+		for( const Cue& cue : cues )
+		{
+			if( now < cue.from )
+				continue;
+
+			float value = cue.second;
+			if( cue.ramp && now < cue.to && cue.to > cue.from )
+			{
+				const double t = ( now - cue.from ) / ( cue.to - cue.from );
+				// Smoothstep rather than linear. A parameter that starts and
+				// stops abruptly reads as a jump cut even when the value in
+				// between is right.
+				const double eased = t * t * ( 3.0 - 2.0 * t );
+				value = static_cast< float >( cue.first + ( cue.second - cue.first ) * eased );
+			}
+
+			plugin.SetFloatParameter( byName.at( cue.name ), value );
+		}
+
+		Frame f;
+		RenderPlugin( plugin, target, now, f );
+
+		char path[ 1024 ];
+		std::snprintf( path, sizeof( path ), "%s/frame%05d.png", directory.c_str(), frame );
+		if( !WritePng( path, f.width, f.height, f.rgba ) )
+		{
+			std::fprintf( stderr, "could not write %s\n", path );
+			return 1;
+		}
+
+		if( ( frame + 1 ) % 60 == 0 )
+			std::printf( "  %d / %d frames\n", frame + 1, frames );
+	}
+
+	plugin.DeInitGL();
+	CGLSetCurrentContext( nullptr );
+	CGLDestroyContext( context );
+
+	std::printf( "%d frames -> %s\n", frames, directory.c_str() );
+	return 0;
+}
+
 int ListParams()
 {
 	BurinPlugin plugin( false );
@@ -1217,6 +1421,8 @@ int main( int argc, char** argv )
 	double seconds = 0.0;
 	int width = 480, height = 270;
 	std::vector< std::pair< std::string, float > > sets;
+	std::string script;
+	double duration = 24.0, fps = 30.0;
 
 	for( int i = 1; i < argc; ++i )
 	{
@@ -1246,6 +1452,12 @@ int main( int argc, char** argv )
 			if( eq != std::string::npos )
 				sets.emplace_back( s.substr( 0, eq ), std::strtof( s.substr( eq + 1 ).c_str(), nullptr ) );
 		}
+		else if( a == "--script" && i + 1 < argc )
+			script = argv[ ++i ];
+		else if( a == "--seconds" && i + 1 < argc )
+			duration = std::strtod( argv[ ++i ], nullptr );
+		else if( a == "--fps" && i + 1 < argc )
+			fps = std::strtod( argv[ ++i ], nullptr );
 		else if( a == "--images" )
 			images = true;
 	}
@@ -1285,6 +1497,8 @@ int main( int argc, char** argv )
 			return TestRender( file, argv[ ++i ], zoom, progress );
 		else if( a == "--frame" && i + 1 < argc )
 			return RenderThroughPlugin( file, argv[ ++i ], sets, seconds, width, height );
+		else if( a == "--sequence" && i + 1 < argc )
+			return RenderSequence( argv[ ++i ], script, file, width, height, duration, fps );
 		else if( a == "--all" )
 		{
 			TestLadder();
