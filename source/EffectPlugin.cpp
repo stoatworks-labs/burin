@@ -1,0 +1,49 @@
+#include "Rasterizer.h"
+
+/**
+    The effect: the same drawing, over the incoming clip.
+
+    It exists because the obvious way to get a logo over footage in Resolume --
+    put the source on its own layer and pick a blend mode -- costs a layer and
+    puts the drawing's controls somewhere other than the clip they belong to.
+    This one sits on the clip, and Mix crossfades it.
+
+    Note what this plugin does **not** offer, in deliberate contrast to
+    flipbook's effect build: there is no "take the incoming clip as the
+    drawing". A clip is a raster. The whole of this plugin's reason to exist is
+    that its source is *not* a raster -- there are paths in it, with fills and
+    strokes and lengths -- and a mode that fed it a bitmap would be a mode in
+    which every interesting control did nothing. See AGENTS.md.
+
+    See SourcePlugin.cpp for why this file is listed in its own target rather
+    than in the shared library.
+*/
+namespace
+{
+class RasterizerEffect : public rasterizer::RasterizerPlugin
+{
+public:
+	RasterizerEffect() :
+		RasterizerPlugin( true )
+	{
+	}
+};
+} // namespace
+
+static CFFGLPluginInfo PluginInfo(
+	PluginFactory< RasterizerEffect >,          // Create method
+	"RZ02",                                     // Plugin unique ID of maximum length 4
+	"Rasterizer Over",                          // Plugin name
+	2,                                          // API major version number
+	1,                                          // API minor version number
+	0,                                          // Plugin major version number
+	1,                                          // Plugin minor version number
+	FF_EFFECT,                                  // Plugin type
+	"Vector artwork over the clip, always sharp",// Plugin description
+	"Rasterizer FFGL effect"                    // About
+);
+
+extern "C" const char* RasterizerEffectBuildStamp()
+{
+	return "rasterizer " RASTERIZER_VERSION " effect, built " __DATE__ " " __TIME__;
+}

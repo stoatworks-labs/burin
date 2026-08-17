@@ -1,0 +1,11 @@
+{
+  "name": "rasterizer",
+  "version-string": "0.1.0",
+  "description": "Dependencies for building the Rasterizer FFGL plugins. GLEW is only needed on Windows; macOS uses the system OpenGL framework. SVG parsing and rasterisation is nanosvg, vendored under external/nanosvg, so it is not a dependency here. This file is easy to leave behind when a new plugin repo is copied from an old one, and nothing points at it: the CMakeLists says find_package(GLEW REQUIRED) on non-Apple, macOS never needs it, and so every local build and every macOS CI job passes while the Windows job fails at configure.",
+  "dependencies": [
+    {
+      "name": "glew",
+      "platform": "!osx"
+    }
+  ]
+}
