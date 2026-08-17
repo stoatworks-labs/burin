@@ -62,7 +62,7 @@
     outside. `Measure()` expands each one, which is why a stroke-heavy drawing
     fitted to Content does not lose its outermost edge off the frame.
 */
-namespace rasterizer
+namespace burin
 {
 /// What the file said about one shape, before this frame's settings were
 /// written over it. Restored at the top of every rasterise.
@@ -236,4 +236,4 @@ Unsupported ScanUnsupported( const std::string& text );
 /// where a half-percent is invisible. See Reveal.cpp.
 float SubpathLength( const float* pts, int npts );
 
-} // namespace rasterizer
+} // namespace burin

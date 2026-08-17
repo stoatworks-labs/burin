@@ -26,7 +26,7 @@
     it means "the sliders are the truth".
 */
 
-namespace rasterizer
+namespace burin
 {
 namespace presets
 {
@@ -198,4 +198,4 @@ inline constexpr int kPresetCount = static_cast< int >( sizeof( kPresets ) / siz
 inline constexpr int kOptionCount = kPresetCount + 1;
 
 } // namespace presets
-} // namespace rasterizer
+} // namespace burin

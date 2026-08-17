@@ -1,11 +1,11 @@
-# rasterizer — orientation for another LLM (or a newcomer)
+# burin — orientation for another LLM (or a newcomer)
 
 **What it is:** vector artwork rendered at the size it is being seen at, as
 **two** FFGL 2.1 plugins for Resolume Arena/Avenue, plus an OpenFX build of both
-for Resolve/Nuke/Natron/Vegas. `Rasterizer` is a source that draws an SVG;
-`Rasterizer Over` draws one over the incoming clip. C++17 + GLSL 4.1, CMake,
+for Resolve/Nuke/Natron/Vegas. `Burin` is a source that draws an SVG;
+`Burin Over` draws one over the incoming clip. C++17 + GLSL 4.1, CMake,
 universal macOS `.bundle` and a Windows `.dll`. Public, MIT,
-`github.com/stoatworks-labs/rasterizer`.
+`github.com/stoatworks-labs/burin`.
 
 `CLAUDE.md` is the command reference — build, install, verify. This file is the
 *why*: read it before touching the scale ladder, the dash arithmetic, or
@@ -33,7 +33,7 @@ avoid. Snapping up means the raster is always at least as fine as the screen
 needs and the hardware only ever minifies, which costs sharpness nothing. The
 price is up to twice the pixel area; Detail is the control that buys it back.
 
-`rztest --crisp` is where that stops being a claim. It renders a hard edge at six
+`burintest --crisp` is where that stops being a claim. It renders a hard edge at six
 zoom levels and measures the width of its alpha transition in device pixels:
 
 ```
@@ -68,7 +68,7 @@ cost 300 rebuilds in 300 frames of pan before the two were separated, and it
 reads as "the cache does not work" rather than as an off-by-one.
 
 **A still frame never rebuilds, and a six-octave zoom rebuilds thirteen times in
-six hundred frames.** `rztest --rebuilds` asserts both. The ladder has to be
+six hundred frames.** `burintest --rebuilds` asserts both. The ladder has to be
 *seldom* as well as sharp, and "seldom" is a claim about frequency, which can
 only be checked by counting.
 
@@ -146,7 +146,7 @@ prevents it and it defaults to about one device pixel.
 shader's last line premultiplies (FFGL composites premultiplied); `ComposeFrame`
 produces straight alpha. Bringing the GPU frame *down* by dividing by alpha
 amplifies an 8-bit rounding difference by 255 on pixels whose alpha is one or two
-levels — the first version of `rztest --gpu` reported the two as 255 levels apart
+levels — the first version of `burintest --gpu` reported the two as 255 levels apart
 while their alpha channels agreed to the bit. Bringing the CPU frame *up* instead
 gives a worst-case difference of **0**.
 
@@ -156,7 +156,7 @@ second implementation for OFX. This one builds its picture with a CPU rasteriser
 in *both* builds, so Document, Style, Reveal, Motion, Raster, Compose, Settings
 and Controls are linked straight from source by the OFX target. What is mirrored
 is the tail of `ComposeFrame` against the tail of the fragment shader — five
-lines, marked `//= mirrored` in both. `rztest --gpu` is the test.
+lines, marked `//= mirrored` in both. `burintest --gpu` is the test.
 
 **The fragment shader inverts the transform per pixel instead of transforming a
 quad.** A quad would be faster and is not what happens, because the CPU

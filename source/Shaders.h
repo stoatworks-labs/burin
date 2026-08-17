@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace rasterizer
+namespace burin
 {
 /**
     The GPU half — which is deliberately almost nothing.
@@ -15,7 +15,7 @@ namespace rasterizer
 
     **Those five lines are the only mirrored arithmetic in the repo**, and their
     twin is the tail of `ComposeFrame` in Compose.cpp, marked there with a
-    `//= mirrored` comment. `rztest --mirror` renders the same frame through
+    `//= mirrored` comment. `burintest --mirror` renders the same frame through
     both and compares them; it is the only thing that catches the two drifting.
 
     ## Why the fragment shader inverts the transform per pixel
@@ -55,4 +55,4 @@ extern const char* const kVertexShader;
 /// inconsistently, changing the uniform locations between the two builds.
 std::string FragmentShader( bool isEffect );
 
-} // namespace rasterizer
+} // namespace burin

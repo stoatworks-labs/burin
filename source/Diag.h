@@ -38,7 +38,7 @@
       because a shader that builds on one machine and not on another is a driver
       answer, not a source answer.
 */
-namespace rasterizer::diag
+namespace burin::diag
 {
 
 /// Open the log file and record the plugin build, once per process.
@@ -51,4 +51,4 @@ void error( const std::string& message );
 /// Full path of the log file, for the README to point at.
 std::string logPath();
 
-} // namespace rasterizer::diag
+} // namespace burin::diag

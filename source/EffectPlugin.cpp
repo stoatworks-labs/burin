@@ -1,4 +1,4 @@
-#include "Rasterizer.h"
+#include "Burin.h"
 
 /**
     The effect: the same drawing, over the incoming clip.
@@ -20,30 +20,30 @@
 */
 namespace
 {
-class RasterizerEffect : public rasterizer::RasterizerPlugin
+class BurinEffect : public burin::BurinPlugin
 {
 public:
-	RasterizerEffect() :
-		RasterizerPlugin( true )
+	BurinEffect() :
+		BurinPlugin( true )
 	{
 	}
 };
 } // namespace
 
 static CFFGLPluginInfo PluginInfo(
-	PluginFactory< RasterizerEffect >,          // Create method
-	"RZ02",                                     // Plugin unique ID of maximum length 4
-	"Rasterizer Over",                          // Plugin name
+	PluginFactory< BurinEffect >,          // Create method
+	"BU02",                                     // Plugin unique ID of maximum length 4
+	"Burin Over",                          // Plugin name
 	2,                                          // API major version number
 	1,                                          // API minor version number
 	0,                                          // Plugin major version number
 	1,                                          // Plugin minor version number
 	FF_EFFECT,                                  // Plugin type
 	"Vector artwork over the clip, always sharp",// Plugin description
-	"Rasterizer FFGL effect"                    // About
+	"Burin FFGL effect"                    // About
 );
 
-extern "C" const char* RasterizerEffectBuildStamp()
+extern "C" const char* BurinEffectBuildStamp()
 {
-	return "rasterizer " RASTERIZER_VERSION " effect, built " __DATE__ " " __TIME__;
+	return "burin " BURIN_VERSION " effect, built " __DATE__ " " __TIME__;
 }

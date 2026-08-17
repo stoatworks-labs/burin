@@ -37,10 +37,10 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release "${ARCHFLAG[@]}" >/dev/null
 cmake --build build -j"$(sysctl -n hw.ncpu)" >/dev/null
 pass "builds clean"
 
-SOURCE_BUNDLE="build/Rasterizer.bundle/Contents/MacOS/Rasterizer"
-EFFECT_BUNDLE="build/Rasterizer Over.bundle/Contents/MacOS/Rasterizer Over"
-OFX_BUNDLE="build/Rasterizer.ofx.bundle"
-OFX_BIN="$OFX_BUNDLE/Contents/MacOS/Rasterizer.ofx"
+SOURCE_BUNDLE="build/Burin.bundle/Contents/MacOS/Burin"
+EFFECT_BUNDLE="build/Burin Over.bundle/Contents/MacOS/Burin Over"
+OFX_BUNDLE="build/Burin.ofx.bundle"
+OFX_BIN="$OFX_BUNDLE/Contents/MacOS/Burin.ofx"
 
 #---------------------------------------------------------------------------
 head "bundles"
@@ -56,7 +56,7 @@ for bin in "$SOURCE_BUNDLE" "$EFFECT_BUNDLE"; do
 	# The registration trap. CFFGLPluginInfo is constructed at file scope and
 	# never referenced by name, so in a STATIC archive the linker is entitled to
 	# drop the whole translation unit — giving a bundle that loads, exports
-	# plugMain, and reports that it contains no plugins. rasterizer_core is an
+	# plugMain, and reports that it contains no plugins. burin_core is an
 	# OBJECT library to prevent it; this is what proves it worked.
 	if [[ "$(nm -gU "$bin" | grep -c '_plugMain' || true)" == "1" ]]; then
 		pass "$name: exports plugMain"
@@ -73,7 +73,7 @@ for bin in "$SOURCE_BUNDLE" "$EFFECT_BUNDLE"; do
 	# bundle — counting lines reports a clean universal build as carrying two
 	# plugins, which is precisely the failure this check exists to detect and
 	# would have made it useless exactly when it was needed.
-	ids="$(strings "$bin" | grep -oE '^RZ0[12]$' | sort -u | tr '\n' ' ' | sed 's/ $//')"
+	ids="$(strings "$bin" | grep -oE '^BU0[12]$' | sort -u | tr '\n' ' ' | sed 's/ $//')"
 	if [[ "$(printf '%s' "$ids" | wc -w | tr -d ' ')" == "1" ]]; then
 		pass "$name: registers exactly one plugin ($ids)"
 	else
@@ -151,12 +151,23 @@ if [[ -f docs/example-plate.svg ]]; then
 	# Regenerated and compared, so a hand edit to the shipped file — which would
 	# be lost the next time anyone runs the generator — is caught here rather
 	# than discovered later.
+	#
+	# Compared against the FILE, not against git. An earlier version regenerated
+	# and then ran `git diff --quiet`, which conflates two different questions:
+	# "does the shipped drawing match its generator" (what is being asked) and
+	# "is the working tree clean" (what git answers). Any uncommitted change to
+	# either file made it fail, which it duly did during a rename with both
+	# staged and neither committed — reporting a drawing that matched its
+	# generator perfectly as drifted.
+	snapshot="$(mktemp)"
+	cp docs/example-plate.svg "$snapshot"
 	python3 tools/make_example_svg.py >/dev/null
-	if git diff --quiet -- docs/example-plate.svg 2>/dev/null; then
+	if cmp -s docs/example-plate.svg "$snapshot"; then
 		pass "docs/example-plate.svg matches its generator"
 	else
 		fail "docs/example-plate.svg differs from what make_example_svg.py produces"
 	fi
+	rm -f "$snapshot"
 
 	# It must contain no <text>: nanosvg ignores text entirely, and the file
 	# that demonstrates the plugin must not also demonstrate its main limitation.
@@ -172,11 +183,11 @@ fi
 #---------------------------------------------------------------------------
 head "measurements"
 #---------------------------------------------------------------------------
-if ./build/rztest --all 2>&1 | tee /tmp/rztest.log | grep -qE '^all checks passed'; then
-	pass "rztest --all"
+if ./build/burintest --all 2>&1 | tee /tmp/burintest.log | grep -qE '^all checks passed'; then
+	pass "burintest --all"
 else
-	fail "rztest --all — see /tmp/rztest.log"
-	grep -E '^  FAIL' /tmp/rztest.log | sed 's/^/    /' || true
+	fail "burintest --all — see /tmp/burintest.log"
+	grep -E '^  FAIL' /tmp/burintest.log | sed 's/^/    /' || true
 fi
 
 #---------------------------------------------------------------------------

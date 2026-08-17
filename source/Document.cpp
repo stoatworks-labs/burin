@@ -9,7 +9,7 @@
 #include <fstream>
 #include <sstream>
 
-namespace rasterizer
+namespace burin
 {
 namespace
 {
@@ -245,7 +245,7 @@ void Document::Adopt( NSVGimage* image, const std::string& name )
 	image_ = image;
 	Measure();
 
-	// The note is the one line the log and `rztest --doc` both print. It has to
+	// The note is the one line the log and `burintest --doc` both print. It has to
 	// carry the shape count (is the file even reaching us), the viewport (is the
 	// scale sane) and — above all — what was dropped, because a file that is
 	// mostly live text parses perfectly and renders nothing.
@@ -402,4 +402,4 @@ void Document::ResetShapes() const
 	}
 }
 
-} // namespace rasterizer
+} // namespace burin

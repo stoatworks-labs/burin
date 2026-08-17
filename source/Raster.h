@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-namespace rasterizer
+namespace burin
 {
 /**
     The raster: the drawing, built at the size it will actually be seen at.
@@ -56,7 +56,7 @@ namespace rasterizer
     **The write-on rebuilds every frame.** Its whole purpose is that the pixels
     change, so there is nothing to cache; a reveal running on a thousand-path
     drawing is a thousand-path rasterise per frame. Measured rather than
-    guessed: `rztest --cost` reports it for the file you are pointing at.
+    guessed: `burintest --cost` reports it for the file you are pointing at.
 
     **Rotation is resampled, not re-rasterised.** nanosvg takes a scale and a
     translation and no angle, and rotating the geometry instead would mean
@@ -132,7 +132,7 @@ struct RasterPlacement
 ///
 /// Always rounds **up**: see the class comment. The consequence worth stating
 /// is that `SnapScale(s) >= s` for every s, which is the property the whole
-/// crispness claim rests on and which `rztest --ladder` asserts directly.
+/// crispness claim rests on and which `burintest --ladder` asserts directly.
 float SnapScale( float scale, int extraRungs = 0 );
 
 /// The map from document units to frame pixels for this request.
@@ -217,4 +217,4 @@ private:
 	uint64_t rebuilds_ = 0;
 };
 
-} // namespace rasterizer
+} // namespace burin

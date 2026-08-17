@@ -1,6 +1,6 @@
 #include "Shaders.h"
 
-namespace rasterizer
+namespace burin
 {
 const char* const kVertexShader = R"(#version 410 core
 
@@ -122,4 +122,4 @@ void main()
 	return source;
 }
 
-} // namespace rasterizer
+} // namespace burin

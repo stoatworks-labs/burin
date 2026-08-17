@@ -1,8 +1,8 @@
-# rasterizer
+# burin
 
 Vector artwork rendered at the size it is being seen at — as **two** FFGL
-plugins for Resolume Arena/Avenue: a source (`Rasterizer`) that draws an SVG, and
-an effect (`Rasterizer Over`) that draws one over the incoming clip. C++/GLSL,
+plugins for Resolume Arena/Avenue: a source (`Burin`) that draws an SVG, and
+an effect (`Burin Over`) that draws one over the incoming clip. C++/GLSL,
 CMake MODULE → universal `.bundle` (macOS) + Windows `.dll`. Public MIT repo.
 
 Read `AGENTS.md` before changing the scale ladder, the dash arithmetic, or
@@ -14,23 +14,23 @@ anything that writes into an `NSVGshape`.
 - Build: `cmake --build build`
 - Install both bundles to Resolume: `cmake --install build`
 - Render a frame through the real plugin class:
-  `./build/rztest --frame /tmp/f.png --file docs/example-plate.svg --size 1280x720`
+  `./build/burintest --frame /tmp/f.png --file docs/example-plate.svg --size 1280x720`
 - Set anything by name: `--set "Zoom=0.8" --set "Draw=2" --set "Recolour=3"`
-- List parameters, with types, defaults and ranges: `./build/rztest --list`
-- What a drawing parses to: `./build/rztest --doc --file yours.svg`
-- What a rebuild costs on it: `./build/rztest --cost --file yours.svg`
+- List parameters, with types, defaults and ranges: `./build/burintest --list`
+- What a drawing parses to: `./build/burintest --doc --file yours.svg`
+- What a rebuild costs on it: `./build/burintest --cost --file yours.svg`
 - Regenerate the example drawing: `python3 tools/make_example_svg.py`
 
 ## OpenFX build
-- `source/ofx/RasterizerOFX.cpp` → `build/Rasterizer.ofx.bundle` (target
-  `RasterizerOFX`, `-DBUILD_OFX=OFF` to skip): **both** plugins in one bundle —
-  `com.stoatworks.rasterizer` (generator) and `com.stoatworks.rasterizerover`
+- `source/ofx/BurinOFX.cpp` → `build/Burin.ofx.bundle` (target
+  `BurinOFX`, `-DBUILD_OFX=OFF` to skip): **both** plugins in one bundle —
+  `com.stoatworks.burin` (generator) and `com.stoatworks.burinover`
   (filter).
 - **Almost nothing is mirrored.** Document, Style, Reveal, Motion, Raster,
   Compose, Settings and Controls are linked straight from source — the picture is
   built by a CPU rasteriser in both builds, so there is one implementation of all
   of it. Only the tail of `ComposeFrame` has a twin, in the fragment shader,
-  marked `//= mirrored` in both. `rztest --gpu` is the test.
+  marked `//= mirrored` in both. `burintest --gpu` is the test.
 - `Settings.cpp` shares the *reading of the controls* too, which is what makes a
   preset the same look in Resolve as in Resolume rather than merely the same
   numbers.
@@ -44,7 +44,7 @@ anything that writes into an `NSVGshape`.
   numeric setting is measuring an empty frame that renders perfectly and draws
   nothing:
   ```
-  ../resolume-ofx-bridge/build/ofxprobe --dir build --render com.stoatworks.rasterizerover \
+  ../resolume-ofx-bridge/build/ofxprobe --dir build --render com.stoatworks.burinover \
     --size 480x270 --out /tmp/f.bmp --set-string "drawing=$PWD/docs/example-plate.svg" \
     --set "zoom=0.5"
   ```
@@ -53,14 +53,14 @@ anything that writes into an `NSVGshape`.
 
 ## Verify
 - Everything, including the release-time traps: `tools/verify.sh`
-- The central claim, measured against its own control: `./build/rztest --crisp`
-- The ladder only ever snaps up: `./build/rztest --ladder`
-- The cache is seldom as well as sharp: `./build/rztest --rebuilds`
-- Fill and stroke are the file's own paint: `./build/rztest --style`
-- Write-on timing, against `Reveal.cpp`: `./build/rztest --reveal`
-- Clock, waveforms, spin, zoom octaves: `./build/rztest --motion`
-- The shipped class in real GL, and the CPU/GPU mirror: `./build/rztest --gpu`
-- Every factory preset through the real dropdown: `./build/rztest --presets`
+- The central claim, measured against its own control: `./build/burintest --crisp`
+- The ladder only ever snaps up: `./build/burintest --ladder`
+- The cache is seldom as well as sharp: `./build/burintest --rebuilds`
+- Fill and stroke are the file's own paint: `./build/burintest --style`
+- Write-on timing, against `Reveal.cpp`: `./build/burintest --reveal`
+- Clock, waveforms, spin, zoom octaves: `./build/burintest --motion`
+- The shipped class in real GL, and the CPU/GPU mirror: `./build/burintest --gpu`
+- Every factory preset through the real dropdown: `./build/burintest --presets`
 - No dead controls: `python3 tools/sweep.py`
 
 ## Notes
@@ -95,7 +95,7 @@ anything that writes into an `NSVGshape`.
 - **Straight alpha until the last line of the fragment shader.** nanosvg
   un-premultiplies on the way out, and nothing in this path multiplies by alpha
   before the end.
-- `rasterizer_core` is an **OBJECT** library, and each plugin's registration is
+- `burin_core` is an **OBJECT** library, and each plugin's registration is
   listed directly in its own target — see `AGENTS.md`. `verify.sh` checks both
   failure directions, counting **unique** IDs (a universal binary has two slices
   and `strings` walks both).
@@ -113,4 +113,4 @@ or parse, a file that parsed and contains nothing this renderer can draw (the
 important one — live text), a raster capped for size, and a shader that would not
 compile.
 
-    ~/Library/Logs/rasterizer/rasterizer.YYYY-MM-DD.log
+    ~/Library/Logs/burin/burin.YYYY-MM-DD.log

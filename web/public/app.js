@@ -1,4 +1,4 @@
-// Rasterizer — web demo.
+// Burin — web demo.
 //
 // A port of the plugin's DECISIONS, not of its rasteriser. The scale ladder,
 // the cache rule, the motion, the reveal timing and the style selection are the

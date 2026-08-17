@@ -1,8 +1,8 @@
 name: release
 
-# Build both Rasterizer plugins for the two platforms Resolume runs on:
-#   - macOS   -> universal (arm64 + x86_64) Rasterizer.bundle + "Rasterizer Over.bundle"
-#   - Windows -> x64 Rasterizer.dll + "Rasterizer Over.dll" (GLEW static via vcpkg)
+# Build both Burin plugins for the two platforms Resolume runs on:
+#   - macOS   -> universal (arm64 + x86_64) Burin.bundle + "Burin Over.bundle"
+#   - Windows -> x64 Burin.dll + "Burin Over.dll" (GLEW static via vcpkg)
 #
 # Two artefacts per platform and not one, because FFGL resolves a single plugMain
 # per binary: a source and an effect are two bundles, not one bundle with two
@@ -36,7 +36,7 @@ jobs:
       # --- macOS: no extra deps, universal build straight from CMake ---
       - name: Configure (macOS)
         if: runner.os == 'macOS'
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DRASTERIZER_BUILD_TOOLS=OFF
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DBURIN_BUILD_TOOLS=OFF
 
       # --- Windows: GLEW comes from vcpkg, static-linked (static-md keeps the
       #     CRT dynamic so the plugin matches the host) so the .dll has no
@@ -46,7 +46,7 @@ jobs:
         run: >
           cmake -B build -A x64
           -DCMAKE_BUILD_TYPE=Release
-          -DRASTERIZER_BUILD_TOOLS=OFF
+          -DBURIN_BUILD_TOOLS=OFF
           -DVCPKG_TARGET_TRIPLET=x64-windows-static-md
           -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
 
@@ -68,7 +68,7 @@ jobs:
         run: |
           mkdir -p out
           if [ "${{ runner.os }}" = "macOS" ]; then
-            for bundle in "Rasterizer" "Rasterizer Over"; do
+            for bundle in "Burin" "Burin Over"; do
               cp -R "build/$bundle.bundle" "out/$bundle.bundle"
               # The registration lives in a file-scope constructor nothing names,
               # so a linker that dropped the translation unit would still produce
@@ -99,8 +99,8 @@ jobs:
               esac
             done
           else
-            cp "build/Release/Rasterizer.dll" "out/Rasterizer.dll"
-            cp "build/Release/Rasterizer Over.dll" "out/Rasterizer Over.dll"
+            cp "build/Release/Burin.dll" "out/Burin.dll"
+            cp "build/Release/Burin Over.dll" "out/Burin Over.dll"
           fi
           # The example drawing ships with the download. A plugin that renders
           # somebody else's vector artwork does nothing at all on first run
@@ -113,13 +113,13 @@ jobs:
           # artefact — it installs to the OFX folder, not Resolume's.
           mkdir -p ofxout
           if [ "${{ runner.os }}" = "macOS" ]; then
-            cp -R "build/Rasterizer.ofx.bundle" "ofxout/Rasterizer.ofx.bundle"
-            lipo -archs "ofxout/Rasterizer.ofx.bundle/Contents/MacOS/Rasterizer.ofx"
-            nm -gU "ofxout/Rasterizer.ofx.bundle/Contents/MacOS/Rasterizer.ofx" | grep "_OfxGetPlugin" >/dev/null
-            codesign --force --sign - --timestamp=none "ofxout/Rasterizer.ofx.bundle"
+            cp -R "build/Burin.ofx.bundle" "ofxout/Burin.ofx.bundle"
+            lipo -archs "ofxout/Burin.ofx.bundle/Contents/MacOS/Burin.ofx"
+            nm -gU "ofxout/Burin.ofx.bundle/Contents/MacOS/Burin.ofx" | grep "_OfxGetPlugin" >/dev/null
+            codesign --force --sign - --timestamp=none "ofxout/Burin.ofx.bundle"
           else
-            mkdir -p "ofxout/Rasterizer.ofx.bundle/Contents/Win64"
-            cp "build/Rasterizer.ofx.bundle/Contents/Win64/Rasterizer.ofx" "ofxout/Rasterizer.ofx.bundle/Contents/Win64/Rasterizer.ofx"
+            mkdir -p "ofxout/Burin.ofx.bundle/Contents/Win64"
+            cp "build/Burin.ofx.bundle/Contents/Win64/Burin.ofx" "ofxout/Burin.ofx.bundle/Contents/Win64/Burin.ofx"
           fi
           ls -R ofxout
           ls -R out
@@ -129,15 +129,15 @@ jobs:
         run: |
           cd out
           if command -v 7z >/dev/null 2>&1; then
-            7z a "../rasterizer-${{ matrix.name }}.zip" ./*
+            7z a "../burin-${{ matrix.name }}.zip" ./*
           else
-            zip -r "../rasterizer-${{ matrix.name }}.zip" ./*
+            zip -r "../burin-${{ matrix.name }}.zip" ./*
           fi
           cd ../ofxout
           if command -v 7z >/dev/null 2>&1; then
-            7z a "../rasterizer-ofx-${{ matrix.name }}.zip" ./*
+            7z a "../burin-ofx-${{ matrix.name }}.zip" ./*
           else
-            zip -r "../rasterizer-ofx-${{ matrix.name }}.zip" ./*
+            zip -r "../burin-ofx-${{ matrix.name }}.zip" ./*
           fi
 
       - name: Disk image (macOS)
@@ -151,17 +151,17 @@ jobs:
         # README says is the honest shape here.
         run: |
           source scripts/release-lib.sh
-          rl_init "Rasterizer" rasterizer "${{ steps.ver.outputs.version }}" \
-            com.stoatworks.rasterizer "$GITHUB_WORKSPACE"
+          rl_init "Burin" burin "${{ steps.ver.outputs.version }}" \
+            com.stoatworks.burin "$GITHUB_WORKSPACE"
           cp README.md out/ 2>/dev/null || true
-          rl_adhoc_sign "out/Rasterizer.bundle"
-          rl_adhoc_sign "out/Rasterizer Over.bundle"
+          rl_adhoc_sign "out/Burin.bundle"
+          rl_adhoc_sign "out/Burin Over.bundle"
           rl_dmg "${{ matrix.name }}" out
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: rasterizer-${{ matrix.name }}
+          name: burin-${{ matrix.name }}
           path: |
             *.zip
             *.dmg
@@ -191,8 +191,8 @@ jobs:
           source scripts/release-lib.sh
           version="${GITHUB_REF_NAME#v}"
           case "$version" in [0-9]*) ;; *) version="0.0.0" ;; esac
-          rl_init "Rasterizer" rasterizer "$version" com.stoatworks.rasterizer "$PWD/installers"
-          zip="$(find artifacts -name "rasterizer-windows-x86_64.zip" | head -1)"
+          rl_init "Burin" burin "$version" com.stoatworks.burin "$PWD/installers"
+          zip="$(find artifacts -name "burin-windows-x86_64.zip" | head -1)"
           if [ -z "$zip" ]; then echo "no Windows artefact, nothing to do"; exit 0; fi
           stage="$RUNNER_TEMP/stage-win"
           rm -rf "$stage"; mkdir -p "$stage"
@@ -204,7 +204,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: rasterizer-windows-installer
+          name: burin-windows-installer
           path: installers/*
           if-no-files-found: warn
 

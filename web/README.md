@@ -1,6 +1,6 @@
-# The Rasterizer web demo
+# The Burin web demo
 
-The plugin's idea, running at **rasterizer.stoatworks-labs.com**. Drop your own
+The plugin's idea, running at **burin.stoatworks-labs.com**. Drop your own
 SVG on it and it draws it — which is the demo, because a plugin whose whole job
 is rendering somebody else's artwork is best argued for with the visitor's own.
 

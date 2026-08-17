@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace rasterizer
+namespace burin
 {
 namespace
 {
@@ -145,4 +145,4 @@ uint32_t ScatterKey( int shapeIndex, int shapeCount )
 	return Hash32( static_cast< uint32_t >( shapeIndex ) * 2654435761u ^ static_cast< uint32_t >( shapeCount ) );
 }
 
-} // namespace rasterizer
+} // namespace burin

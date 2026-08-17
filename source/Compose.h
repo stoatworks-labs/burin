@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace rasterizer
+namespace burin
 {
 /**
     Putting the raster on the screen.
@@ -23,7 +23,7 @@ namespace rasterizer
     rasteriser for both builds — Document, Style, Reveal, Motion and Raster have
     exactly one implementation and the OFX target links the same objects. What
     is left over is the last step: fetch a texel, tint it, composite it. Those
-    three lines are in `Compose.cpp` and in `Shaders.cpp`, and `rztest --mirror`
+    three lines are in `Compose.cpp` and in `Shaders.cpp`, and `burintest --mirror`
     is the test whose only job is catching them drifting apart.
 
     ## Bilinear, and clamped half a texel inside
@@ -86,4 +86,4 @@ void ComposeFrame( Frame& frame, const std::vector< uint8_t >& pixels,
                    const RasterPlacement& placement, const Transform2D& inverse,
                    const ComposeSettings& settings, const Frame* input );
 
-} // namespace rasterizer
+} // namespace burin

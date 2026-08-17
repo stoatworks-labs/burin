@@ -1,5 +1,5 @@
 /**
-    rztest — the offline harness.
+    burintest — the offline harness.
 
     Where this plugin is verified rather than previewed. Everything here drives
     the **real** classes: the same Document, Style, Reveal, Motion, Raster and
@@ -20,7 +20,7 @@
 #include "Document.h"
 #include "Motion.h"
 #include "Raster.h"
-#include "Rasterizer.h"
+#include "Burin.h"
 #include "Reveal.h"
 #include "Style.h"
 
@@ -38,7 +38,7 @@
 #include <vector>
 #include <zlib.h>
 
-using namespace rasterizer;
+using namespace burin;
 
 namespace
 {
@@ -330,7 +330,7 @@ int TestCrisp( bool writeImages )
 			if( writeImages )
 			{
 				char path[ 256 ];
-				std::snprintf( path, sizeof( path ), "/tmp/rztest-crisp-live-%02dx.png", static_cast< int >( zooms[ i ] ) );
+				std::snprintf( path, sizeof( path ), "/tmp/burintest-crisp-live-%02dx.png", static_cast< int >( zooms[ i ] ) );
 				WritePng( path, frame.width, frame.height, frame.rgba );
 			}
 		}
@@ -368,7 +368,7 @@ int TestCrisp( bool writeImages )
 			if( writeImages )
 			{
 				char path[ 256 ];
-				std::snprintf( path, sizeof( path ), "/tmp/rztest-crisp-frozen-%02dx.png", static_cast< int >( zooms[ i ] ) );
+				std::snprintf( path, sizeof( path ), "/tmp/burintest-crisp-frozen-%02dx.png", static_cast< int >( zooms[ i ] ) );
 				WritePng( path, frame.width, frame.height, frame.rgba );
 			}
 		}
@@ -871,7 +871,7 @@ Target MakeTarget( int width, int height )
 
 /// Render one frame through the plugin and read it back **top row first**, to
 /// match `Frame`. GL hands over bottom-up; this is the one place that flips.
-void RenderPlugin( RasterizerPlugin& plugin, const Target& target, double seconds, Frame& out )
+void RenderPlugin( BurinPlugin& plugin, const Target& target, double seconds, Frame& out )
 {
 	FFGLViewportStruct viewport{};
 	viewport.x      = 0;
@@ -943,7 +943,7 @@ int TestGpu( bool writeImages )
 		return 1;
 	}
 
-	RasterizerPlugin plugin( false );
+	BurinPlugin plugin( false );
 	if( !plugin.LoadDocumentString( kStyleSvg, "style.svg" ) )
 	{
 		Check( false, "the built-in document loads into the plugin" );
@@ -957,7 +957,7 @@ int TestGpu( bool writeImages )
 	Check( InkFraction( gpu ) > 0.0f, "the plugin draws something at all" );
 
 	if( writeImages )
-		WritePng( "/tmp/rztest-gpu.png", gpu.width, gpu.height, gpu.rgba );
+		WritePng( "/tmp/burintest-gpu.png", gpu.width, gpu.height, gpu.rgba );
 
 	//----------------------------------------------------------------------
 	// The mirror. Shaders.cpp and Compose.cpp are the only duplicated
@@ -984,7 +984,7 @@ int TestGpu( bool writeImages )
 	}
 
 	if( writeImages )
-		WritePng( "/tmp/rztest-cpu.png", cpu.width, cpu.height, cpu.rgba );
+		WritePng( "/tmp/burintest-cpu.png", cpu.width, cpu.height, cpu.rgba );
 
 	double worst = 0.0, total = 0.0;
 	const size_t n = static_cast< size_t >( gpu.width ) * gpu.height;
@@ -1044,7 +1044,7 @@ int TestPresets()
 
 	for( int i = 0; i < presets::kPresetCount; ++i )
 	{
-		RasterizerPlugin plugin( false );
+		BurinPlugin plugin( false );
 		plugin.LoadDocumentString( kStyleSvg, "style.svg" );
 
 		// Through SetFloatParameter, exactly as a host would, so the preset
@@ -1118,7 +1118,7 @@ int RenderThroughPlugin( const std::string& svgPath, const std::string& out,
 		return 1;
 	}
 
-	RasterizerPlugin plugin( false );
+	BurinPlugin plugin( false );
 
 	if( svgPath.empty() )
 	{
@@ -1171,7 +1171,7 @@ int RenderThroughPlugin( const std::string& svgPath, const std::string& out,
 
 int ListParams()
 {
-	RasterizerPlugin plugin( false );
+	BurinPlugin plugin( false );
 	std::printf( "%-4s %-20s %-10s %-10s %s\n", "id", "name", "type", "default", "range" );
 	for( unsigned int id = 0; id < plugin.GetNumParams(); ++id )
 	{
@@ -1187,7 +1187,7 @@ int ListParams()
 void Usage()
 {
 	std::printf(
-		"rztest — the rasterizer harness\n"
+		"burintest — the burin harness\n"
 		"\n"
 		"  --all                     every check below\n"
 		"  --ladder                  the scale ladder's snap-up property\n"

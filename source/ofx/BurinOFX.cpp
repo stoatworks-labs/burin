@@ -1,6 +1,6 @@
-/// The OpenFX builds of Rasterizer, for DaVinci Resolve, Nuke, Natron, Vegas
+/// The OpenFX builds of Burin, for DaVinci Resolve, Nuke, Natron, Vegas
 /// and other OFX hosts. Two plugins from this one file, as the FFGL side ships
-/// two bundles: "Rasterizer" is a generator, "Rasterizer Over" draws over the
+/// two bundles: "Burin" is a generator, "Burin Over" draws over the
 /// incoming clip.
 ///
 /// ## What is shared, which here is nearly everything
@@ -12,7 +12,7 @@
 /// makes its picture with a CPU rasteriser in **both** builds — the GPU's only
 /// job in Resolume is the final transform and composite — so `Document`,
 /// `Style`, `Reveal`, `Motion`, `Raster`, `Compose`, `Settings` and `Controls`
-/// are linked straight from source and are the same objects `rztest` measures.
+/// are linked straight from source and are the same objects `burintest` measures.
 ///
 /// `Settings.cpp` matters most of all: the reading of the controls is shared,
 /// so "Blueprint" cannot mean one thing in Resolume and another in Resolve.
@@ -58,12 +58,12 @@
 #include "../Settings.h"
 #include "../Style.h"
 
-using namespace rasterizer;
+using namespace burin;
 
 namespace
 {
-const char* const kSourceIdentifier = "com.stoatworks.rasterizer";
-const char* const kOverIdentifier   = "com.stoatworks.rasterizerover";
+const char* const kSourceIdentifier = "com.stoatworks.burin";
+const char* const kOverIdentifier   = "com.stoatworks.burinover";
 
 /// OFX parameter names. Kept in one table beside the ParamId they correspond to
 /// so that filling the shared float array is a loop rather than forty lines
@@ -250,10 +250,10 @@ void DescribeParams( OFX::ImageEffectDescriptor& desc, bool isEffect )
 //---------------------------------------------------------------------------
 // The plugin instance.
 //---------------------------------------------------------------------------
-class RasterizerOFXPlugin : public OFX::ImageEffect
+class BurinOFXPlugin : public OFX::ImageEffect
 {
 public:
-	RasterizerOFXPlugin( OfxImageEffectHandle handle, bool isEffect ) :
+	BurinOFXPlugin( OfxImageEffectHandle handle, bool isEffect ) :
 		OFX::ImageEffect( handle ),
 		isEffect_( isEffect )
 	{
@@ -330,7 +330,7 @@ private:
 	RevealPlan plan_;
 };
 
-void RasterizerOFXPlugin::ReadParams( double time, float* params )
+void BurinOFXPlugin::ReadParams( double time, float* params )
 {
 	DefaultParams( params );
 
@@ -381,7 +381,7 @@ void RasterizerOFXPlugin::ReadParams( double time, float* params )
 	}
 }
 
-void RasterizerOFXPlugin::changedParam( const OFX::InstanceChangedArgs& args, const std::string& name )
+void BurinOFXPlugin::changedParam( const OFX::InstanceChangedArgs& args, const std::string& name )
 {
 	if( name != "preset" )
 		return;
@@ -421,7 +421,7 @@ void RasterizerOFXPlugin::changedParam( const OFX::InstanceChangedArgs& args, co
 	( void )args;
 }
 
-void RasterizerOFXPlugin::render( const OFX::RenderArguments& args )
+void BurinOFXPlugin::render( const OFX::RenderArguments& args )
 {
 	std::unique_ptr< OFX::Image > dst( dstClip_->fetchImage( args.time ) );
 	if( !dst )
@@ -593,16 +593,16 @@ void DescribeCommon( OFX::ImageEffectDescriptor& desc, const char* label )
 	desc.setRenderThreadSafety( OFX::eRenderInstanceSafe );
 }
 
-mDeclarePluginFactory( RasterizerSourceFactory, {}, {} );
+mDeclarePluginFactory( BurinSourceFactory, {}, {} );
 
-void RasterizerSourceFactory::describe( OFX::ImageEffectDescriptor& desc )
+void BurinSourceFactory::describe( OFX::ImageEffectDescriptor& desc )
 {
-	DescribeCommon( desc, "Rasterizer" );
+	DescribeCommon( desc, "Burin" );
 	desc.addSupportedContext( OFX::eContextGenerator );
 	desc.addSupportedContext( OFX::eContextGeneral );
 }
 
-void RasterizerSourceFactory::describeInContext( OFX::ImageEffectDescriptor& desc, OFX::ContextEnum )
+void BurinSourceFactory::describeInContext( OFX::ImageEffectDescriptor& desc, OFX::ContextEnum )
 {
 	OFX::ClipDescriptor* dstClip = desc.defineClip( kOfxImageEffectOutputClipName );
 	dstClip->addSupportedComponent( OFX::ePixelComponentRGBA );
@@ -612,21 +612,21 @@ void RasterizerSourceFactory::describeInContext( OFX::ImageEffectDescriptor& des
 	DescribeParams( desc, false );
 }
 
-OFX::ImageEffect* RasterizerSourceFactory::createInstance( OfxImageEffectHandle handle, OFX::ContextEnum )
+OFX::ImageEffect* BurinSourceFactory::createInstance( OfxImageEffectHandle handle, OFX::ContextEnum )
 {
-	return new RasterizerOFXPlugin( handle, false );
+	return new BurinOFXPlugin( handle, false );
 }
 
-mDeclarePluginFactory( RasterizerOverFactory, {}, {} );
+mDeclarePluginFactory( BurinOverFactory, {}, {} );
 
-void RasterizerOverFactory::describe( OFX::ImageEffectDescriptor& desc )
+void BurinOverFactory::describe( OFX::ImageEffectDescriptor& desc )
 {
-	DescribeCommon( desc, "Rasterizer Over" );
+	DescribeCommon( desc, "Burin Over" );
 	desc.addSupportedContext( OFX::eContextFilter );
 	desc.addSupportedContext( OFX::eContextGeneral );
 }
 
-void RasterizerOverFactory::describeInContext( OFX::ImageEffectDescriptor& desc, OFX::ContextEnum )
+void BurinOverFactory::describeInContext( OFX::ImageEffectDescriptor& desc, OFX::ContextEnum )
 {
 	OFX::ClipDescriptor* srcClip = desc.defineClip( kOfxImageEffectSimpleSourceClipName );
 	srcClip->addSupportedComponent( OFX::ePixelComponentRGBA );
@@ -641,9 +641,9 @@ void RasterizerOverFactory::describeInContext( OFX::ImageEffectDescriptor& desc,
 	DescribeParams( desc, true );
 }
 
-OFX::ImageEffect* RasterizerOverFactory::createInstance( OfxImageEffectHandle handle, OFX::ContextEnum )
+OFX::ImageEffect* BurinOverFactory::createInstance( OfxImageEffectHandle handle, OFX::ContextEnum )
 {
-	return new RasterizerOFXPlugin( handle, true );
+	return new BurinOFXPlugin( handle, true );
 }
 } // namespace
 
@@ -652,10 +652,10 @@ void OFX::Plugin::getPluginIDs( OFX::PluginFactoryArray& ids )
 	// Deliberately leaked: a by-value static would register an exit-time
 	// destructor inside this module, and a host that dlclose()s the bundle
 	// before process exit then jumps through a dangling pointer.
-	static RasterizerSourceFactory* sourceFactory =
-		new RasterizerSourceFactory( kSourceIdentifier, PLUGIN_VERSION_MAJOR, PLUGIN_VERSION_MINOR );
-	static RasterizerOverFactory* overFactory =
-		new RasterizerOverFactory( kOverIdentifier, PLUGIN_VERSION_MAJOR, PLUGIN_VERSION_MINOR );
+	static BurinSourceFactory* sourceFactory =
+		new BurinSourceFactory( kSourceIdentifier, PLUGIN_VERSION_MAJOR, PLUGIN_VERSION_MINOR );
+	static BurinOverFactory* overFactory =
+		new BurinOverFactory( kOverIdentifier, PLUGIN_VERSION_MAJOR, PLUGIN_VERSION_MINOR );
 	ids.push_back( sourceFactory );
 	ids.push_back( overFactory );
 }

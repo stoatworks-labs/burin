@@ -5,7 +5,7 @@
 #include "Motion.h"
 #include "Raster.h"
 
-namespace rasterizer
+namespace burin
 {
 /**
     The one reading of the controls, shared by both builds.
@@ -53,4 +53,4 @@ ComposeSettings ComposeFromParams( const float* params, bool isEffect );
 /// each host.
 void DefaultParams( float* params );
 
-} // namespace rasterizer
+} // namespace burin

@@ -9,11 +9,11 @@
 	#include <windows.h>
 #endif
 
-namespace rasterizer::diag
+namespace burin::diag
 {
 namespace
 {
-constexpr const char* kAppName = "rasterizer";
+constexpr const char* kAppName = "burin";
 
 std::mutex g_mutex;
 std::string g_path;
@@ -40,7 +40,7 @@ std::string homeDirectory()
 /// Same locations the rest of the fleet uses, so one folder holds everything.
 std::string logDirectory()
 {
-	const std::string override_ = environmentVariable( "RASTERIZER_LOG_DIR" );
+	const std::string override_ = environmentVariable( "BURIN_LOG_DIR" );
 	if( !override_.empty() )
 		return override_;
 
@@ -145,4 +145,4 @@ std::string logPath()
 	return g_path;
 }
 
-} // namespace rasterizer::diag
+} // namespace burin::diag

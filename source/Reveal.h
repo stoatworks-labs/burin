@@ -5,7 +5,7 @@
 
 #include <vector>
 
-namespace rasterizer
+namespace burin
 {
 class Document;
 
@@ -133,4 +133,4 @@ float ShapeProgress( int slot, int slotCount, float globalProgress, float stagge
 /// fade alone and becomes a staggered build-in.
 void ApplyReveal( const Document& doc, const RevealPlan& plan, const RevealSettings& reveal );
 
-} // namespace rasterizer
+} // namespace burin

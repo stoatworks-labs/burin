@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(Rasterizer
+project(Burin
     VERSION 0.1.0
     LANGUAGES CXX
 )
@@ -41,7 +41,7 @@ if(WIN32)
     add_compile_definitions(NOMINMAX)
 endif()
 
-option(RASTERIZER_BUILD_TOOLS "Build the offline render and measurement harness" ON)
+option(BURIN_BUILD_TOOLS "Build the offline render and measurement harness" ON)
 
 # ---------------------------------------------------------------------------
 # The Resolume FFGL SDK, as a git submodule pinned to b1afaf9 -- the rev the
@@ -69,7 +69,7 @@ add_subdirectory(external/ffgl EXCLUDE_FROM_ALL)
 # its own MODULE target below. Putting either in the shared library would
 # register both plugins into both bundles.
 # ---------------------------------------------------------------------------
-add_library(rasterizer_core OBJECT
+add_library(burin_core OBJECT
     source/Diag.h
     source/Diag.cpp
     source/Hash.h
@@ -94,14 +94,14 @@ add_library(rasterizer_core OBJECT
     source/Shaders.h
     source/Shaders.cpp
     source/Presets.h
-    source/Rasterizer.h
-    source/Rasterizer.cpp
+    source/Burin.h
+    source/Burin.cpp
 )
 
-target_include_directories(rasterizer_core PUBLIC source external/nanosvg)
-target_link_libraries(rasterizer_core PUBLIC ffgl::sdk)
-target_compile_definitions(rasterizer_core PUBLIC RASTERIZER_VERSION="${PROJECT_VERSION}")
-set_target_properties(rasterizer_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(burin_core PUBLIC source external/nanosvg)
+target_link_libraries(burin_core PUBLIC ffgl::sdk)
+target_compile_definitions(burin_core PUBLIC BURIN_VERSION="${PROJECT_VERSION}")
+set_target_properties(burin_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # On Windows/Linux the SDK headers we include pull in <GL/glew.h>. The SDK links
 # GLEW privately, so consumers need it too -- for the include path, and for the
@@ -109,16 +109,16 @@ set_target_properties(rasterizer_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 # OpenGL framework and needs none of this.
 if(NOT APPLE)
     find_package(GLEW REQUIRED)
-    target_link_libraries(rasterizer_core PUBLIC GLEW::GLEW)
+    target_link_libraries(burin_core PUBLIC GLEW::GLEW)
 endif()
 
 # ---------------------------------------------------------------------------
 # The two plugins. FFGL resolves one plugMain per binary, so a source and an
 # effect are two bundles -- not one bundle with two entries.
 # ---------------------------------------------------------------------------
-function(rasterizer_add_plugin target entry bundle_name identifier)
+function(burin_add_plugin target entry bundle_name identifier)
     add_library(${target} MODULE ${entry})
-    target_link_libraries(${target} PRIVATE rasterizer_core)
+    target_link_libraries(${target} PRIVATE burin_core)
 
     if(APPLE)
         set_target_properties(${target} PROPERTIES
@@ -141,21 +141,21 @@ function(rasterizer_add_plugin target entry bundle_name identifier)
     endif()
 endfunction()
 
-rasterizer_add_plugin(RasterizerSource source/SourcePlugin.cpp
-    "Rasterizer" "com.stoatworks.ffgl.rasterizer")
-rasterizer_add_plugin(RasterizerEffect source/EffectPlugin.cpp
-    "Rasterizer Over" "com.stoatworks.ffgl.rasterizer.over")
+burin_add_plugin(BurinSource source/SourcePlugin.cpp
+    "Burin" "com.stoatworks.ffgl.burin")
+burin_add_plugin(BurinEffect source/EffectPlugin.cpp
+    "Burin Over" "com.stoatworks.ffgl.burin.over")
 
 # ---------------------------------------------------------------------------
 # Offline harness. Where the plugin is actually verified rather than merely
 # previewed: it drives the real plugin class through the real FFGL sequence in a
-# headless core-profile context. See tools/rztest.
+# headless core-profile context. See tools/burintest.
 # ---------------------------------------------------------------------------
-if(RASTERIZER_BUILD_TOOLS AND APPLE)
-    add_executable(rztest tools/rztest/main.cpp)
+if(BURIN_BUILD_TOOLS AND APPLE)
+    add_executable(burintest tools/burintest/main.cpp)
     # zlib ships with the OS, which is why the PNG writer is fifty lines here
     # rather than a vendored dependency.
-    target_link_libraries(rztest PRIVATE rasterizer_core z
+    target_link_libraries(burintest PRIVATE burin_core z
         "-framework OpenGL"
         "-framework AppKit"
     )
@@ -183,15 +183,15 @@ endif()
 # Controls are linked straight from source and only the per-pixel composite has
 # a second implementation. That is a much smaller mirror than the rest of the
 # fleet carries, and it is a consequence of the design rather than an accident:
-# a rasterizer's output is a bitmap either way.
+# a burin's output is a bitmap either way.
 # ---------------------------------------------------------------------------
 option(BUILD_OFX "Build the OpenFX plugin" ON)
 
 if(BUILD_OFX)
     set(OFX_SDK "${CMAKE_CURRENT_SOURCE_DIR}/external/openfx")
 
-    add_library(RasterizerOFX MODULE
-        source/ofx/RasterizerOFX.cpp
+    add_library(BurinOFX MODULE
+        source/ofx/BurinOFX.cpp
         source/Controls.cpp
         source/Diag.cpp
         source/SvgLib.cpp
@@ -211,31 +211,31 @@ if(BUILD_OFX)
         ${OFX_SDK}/Support/Library/ofxsProperty.cpp
         ${OFX_SDK}/Support/Library/ofxsPropertyValidation.cpp
     )
-    target_include_directories(RasterizerOFX PRIVATE
+    target_include_directories(BurinOFX PRIVATE
         source
         external/nanosvg
         "${OFX_SDK}/include"
         "${OFX_SDK}/Support/include"
     )
-    target_compile_definitions(RasterizerOFX PRIVATE
+    target_compile_definitions(BurinOFX PRIVATE
         PLUGIN_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
         PLUGIN_VERSION_MINOR=${PROJECT_VERSION_MINOR}
-        RASTERIZER_VERSION="${PROJECT_VERSION}"
+        BURIN_VERSION="${PROJECT_VERSION}"
     )
 
-    set(OFX_BUNDLE_DIR "${CMAKE_BINARY_DIR}/Rasterizer.ofx.bundle")
-    set_target_properties(RasterizerOFX PROPERTIES
+    set(OFX_BUNDLE_DIR "${CMAKE_BINARY_DIR}/Burin.ofx.bundle")
+    set_target_properties(BurinOFX PROPERTIES
         PREFIX ""
         SUFFIX ".ofx"
-        OUTPUT_NAME "Rasterizer"
+        OUTPUT_NAME "Burin"
         LIBRARY_OUTPUT_DIRECTORY "${OFX_BUNDLE_DIR}/Contents/MacOS"
     )
     if(APPLE)
-        set(OFX_BUNDLE_IDENTIFIER "com.stoatworks.rasterizer.ofx")
+        set(OFX_BUNDLE_IDENTIFIER "com.stoatworks.burin.ofx")
         configure_file(cmake/InfoOFX.plist.in
             "${OFX_BUNDLE_DIR}/Contents/Info.plist" @ONLY)
     elseif(WIN32)
-        set_target_properties(RasterizerOFX PROPERTIES
+        set_target_properties(BurinOFX PROPERTIES
             LIBRARY_OUTPUT_DIRECTORY "${OFX_BUNDLE_DIR}/Contents/Win64"
             RUNTIME_OUTPUT_DIRECTORY "${OFX_BUNDLE_DIR}/Contents/Win64"
             LIBRARY_OUTPUT_DIRECTORY_RELEASE "${OFX_BUNDLE_DIR}/Contents/Win64"
@@ -246,12 +246,12 @@ if(BUILD_OFX)
             ARCHIVE_OUTPUT_DIRECTORY "${OFX_BUNDLE_DIR}/importlib"
             ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${OFX_BUNDLE_DIR}/importlib")
     else()
-        set_target_properties(RasterizerOFX PROPERTIES
+        set_target_properties(BurinOFX PROPERTIES
             LIBRARY_OUTPUT_DIRECTORY "${OFX_BUNDLE_DIR}/Contents/Linux-x86-64")
     endif()
 endif()
 
-install(TARGETS RasterizerSource RasterizerEffect
+install(TARGETS BurinSource BurinEffect
     LIBRARY DESTINATION "."
     BUNDLE  DESTINATION "."
 )

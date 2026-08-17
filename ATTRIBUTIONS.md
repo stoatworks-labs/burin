@@ -1,6 +1,6 @@
 # Attributions
 
-Rasterizer is built on other people's work. This file lists what that work is, who did
+Burin is built on other people's work. This file lists what that work is, who did
 it, and what it is doing here.
 
 It is generated — the master lists live in the `stoatworks-backend` repo and are
@@ -58,4 +58,4 @@ Copyright: Jean-loup Gailly and Mark Adler
 
 Linked from the operating system by the offline harness only. Not part of either shipped plugin.
 
-Writes the PNGs that `rztest` produces, which is why the PNG writer in the harness is fifty lines rather than a vendored dependency.
+Writes the PNGs that `burintest` produces, which is why the PNG writer in the harness is fifty lines rather than a vendored dependency.

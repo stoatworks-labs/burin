@@ -37,9 +37,9 @@
     it says it is" is a place you can find by dragging to the middle rather than
     by reading this file.
 */
-namespace rasterizer
+namespace burin
 {
-/// Parameter ids. The declaration order in Rasterizer.cpp is the order they
+/// Parameter ids. The declaration order in Burin.cpp is the order they
 /// appear in the host, and the groups depend on consecutive ids staying
 /// consecutive -- SetParamGroup collapses *runs* of same-group parameters, so
 /// reordering these silently splits a group into two.
@@ -377,4 +377,4 @@ float DetailFromParam( float value );
 /// count, so the order does not change as the clock advances.
 uint32_t ScatterKey( int shapeIndex, int shapeCount );
 
-} // namespace rasterizer
+} // namespace burin

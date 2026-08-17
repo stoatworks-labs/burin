@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "rasterizer-web",
+      "name": "burin-web",
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8177", "--directory", "web/public"],
       "port": 8177

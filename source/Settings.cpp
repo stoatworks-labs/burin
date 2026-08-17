@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace rasterizer
+namespace burin
 {
 namespace
 {
@@ -122,4 +122,4 @@ ComposeSettings ComposeFromParams( const float* params, bool isEffect )
 	return c;
 }
 
-} // namespace rasterizer
+} // namespace burin

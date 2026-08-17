@@ -1,12 +1,12 @@
-// Rasterizer web demo — static-assets-only Worker.
+// Burin web demo — static-assets-only Worker.
 // Deploy from web/: cf-run npx wrangler deploy  (see reference_cloudflare_access)
 {
-  "name": "rasterizer",
+  "name": "burin",
   "compatibility_date": "2026-08-17",
   "assets": {
     "directory": "./public"
   },
   "routes": [
-    { "pattern": "rasterizer.stoatworks-labs.com", "custom_domain": true }
+    { "pattern": "burin.stoatworks-labs.com", "custom_domain": true }
   ]
 }

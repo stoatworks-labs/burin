@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace rasterizer
+namespace burin
 {
 namespace
 {
@@ -227,4 +227,4 @@ void ApplyReveal( const Document& doc, const RevealPlan& plan, const RevealSetti
 	}
 }
 
-} // namespace rasterizer
+} // namespace burin

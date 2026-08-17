@@ -15,7 +15,7 @@
     rasteriser, so there is nowhere else for it to run. Nothing in this repo has
     a GLSL twin and no file carries `//= mirrored` markers. See AGENTS.md.
 */
-namespace rasterizer
+namespace burin
 {
 /// Thomas Wang's 32-bit integer hash. Every input bit reaches every output bit,
 /// which is the whole requirement.
@@ -46,4 +46,4 @@ inline float Hash11( uint32_t a, uint32_t b )
 	return Hash01( a, b ) * 2.0f - 1.0f;
 }
 
-} // namespace rasterizer
+} // namespace burin

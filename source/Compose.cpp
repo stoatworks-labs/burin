@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace rasterizer
+namespace burin
 {
 namespace
 {
@@ -175,4 +175,4 @@ void ComposeFrame( Frame& frame, const std::vector< uint8_t >& pixels,
 	}
 }
 
-} // namespace rasterizer
+} // namespace burin

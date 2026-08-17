@@ -7,7 +7,7 @@
 #include <cmath>
 #include <cstring>
 
-namespace rasterizer
+namespace burin
 {
 namespace
 {
@@ -389,4 +389,4 @@ bool Rasteriser::Build( const Document& document, const RasterRequest& request, 
 	return true;
 }
 
-} // namespace rasterizer
+} // namespace burin

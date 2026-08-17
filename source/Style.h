@@ -2,7 +2,7 @@
 
 #include "Controls.h"
 
-namespace rasterizer
+namespace burin
 {
 class Document;
 
@@ -90,4 +90,4 @@ unsigned int PackABGR( float r, float g, float b, float a );
 /// unchanged by any rotation — grey has no hue to move.
 void RotateHue( float& r, float& g, float& b, float turns );
 
-} // namespace rasterizer
+} // namespace burin

@@ -16,7 +16,7 @@
 #include "Style.h"
 
 /**
-    Rasterizer — vector artwork, rendered at the size it is being seen at.
+    Burin — vector artwork, rendered at the size it is being seen at.
 
     What is worth knowing about how it works is in the other headers and is not
     repeated here:
@@ -44,13 +44,13 @@
 
     See AGENTS.md for the traps.
 */
-namespace rasterizer
+namespace burin
 {
-class RasterizerPlugin : public CFFGLPlugin
+class BurinPlugin : public CFFGLPlugin
 {
 public:
-	explicit RasterizerPlugin( bool isEffect );
-	~RasterizerPlugin() override = default;
+	explicit BurinPlugin( bool isEffect );
+	~BurinPlugin() override = default;
 
 	FFResult InitGL( const FFGLViewportStruct* vp ) override;
 	FFResult ProcessOpenGL( ProcessOpenGLStruct* pGL ) override;
@@ -141,4 +141,4 @@ private:
 	float barPhase_ = 0.0f;
 };
 
-} // namespace rasterizer
+} // namespace burin

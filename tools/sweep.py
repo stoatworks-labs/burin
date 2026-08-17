@@ -8,7 +8,7 @@ and `glGetUniformLocation` quietly returned -1. Neither of those fails to
 compile, fails to load, or fails any other test here. Both look like a slider
 that does nothing.
 
-It works by driving `rztest --frame`, which goes through `SetFloatParameter` by
+It works by driving `burintest --frame`, which goes through `SetFloatParameter` by
 parameter **name** on the real plugin class, so the whole chain from the host's
 call to the pixels is under test.
 
@@ -33,7 +33,7 @@ sweeping the obvious ends reports a working control as dead:
 Run it after any change to the parameter list, and after any change to a
 uniform name.
 
-    python3 tools/sweep.py [--exe build/rztest] [--file docs/example-plate.svg]
+    python3 tools/sweep.py [--exe build/burintest] [--file docs/example-plate.svg]
 """
 
 import argparse
@@ -113,7 +113,7 @@ SKIP = {
     "Drawing":  "a file path, not a float — the sweep sets one for every case anyway",
     "Reset":    "an event; it re-bases a clock, and with the clock forced by the "
                 "harness it provably cannot change the frame",
-    "Preset":   "covered exhaustively by rztest --presets, which checks each one "
+    "Preset":   "covered exhaustively by burintest --presets, which checks each one "
                 "renders rather than merely that they differ",
     "Mix":      "effect-only; the sweep drives the source build, which ignores it "
                 "by design so that a composition can move between the two",
@@ -130,7 +130,7 @@ def run(exe, out, svg, sets, seconds, size):
         cmd += ["--set", f"{k}={v}"]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
-        print(f"    rztest failed: {r.stdout.strip()} {r.stderr.strip()}")
+        print(f"    burintest failed: {r.stdout.strip()} {r.stderr.strip()}")
         return None
     with open(out, "rb") as f:
         return hashlib.sha256(f.read()).hexdigest()
@@ -138,7 +138,7 @@ def run(exe, out, svg, sets, seconds, size):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--exe", default="build/rztest")
+    ap.add_argument("--exe", default="build/burintest")
     ap.add_argument("--file", default="docs/example-plate.svg")
     # Deliberately NOT square. Fit and Fill are the same picture whenever the
     # drawing's aspect matches the frame's, and the example drawing is square —

@@ -1,4 +1,4 @@
-#include "Rasterizer.h"
+#include "Burin.h"
 
 #include "Diag.h"
 #include "Settings.h"
@@ -8,7 +8,7 @@
 #include <cmath>
 #include <cstring>
 
-namespace rasterizer
+namespace burin
 {
 namespace
 {
@@ -24,7 +24,7 @@ float Clamp01( float v )
 }
 } // namespace
 
-RasterizerPlugin::RasterizerPlugin( bool isEffect ) :
+BurinPlugin::BurinPlugin( bool isEffect ) :
 	isEffect_( isEffect )
 {
 	diag::init();
@@ -188,7 +188,7 @@ RasterizerPlugin::RasterizerPlugin( bool isEffect ) :
 //---------------------------------------------------------------------------
 // Parameters
 //---------------------------------------------------------------------------
-FFResult RasterizerPlugin::SetFloatParameter( unsigned int index, float value )
+FFResult BurinPlugin::SetFloatParameter( unsigned int index, float value )
 {
 	if( index >= PT_COUNT_ALL )
 		return FF_FAIL;
@@ -247,12 +247,12 @@ FFResult RasterizerPlugin::SetFloatParameter( unsigned int index, float value )
 	return FF_SUCCESS;
 }
 
-float RasterizerPlugin::GetFloatParameter( unsigned int index )
+float BurinPlugin::GetFloatParameter( unsigned int index )
 {
 	return index < PT_COUNT_ALL ? params_[ index ] : 0.0f;
 }
 
-FFResult RasterizerPlugin::SetTextParameter( unsigned int index, const char* value )
+FFResult BurinPlugin::SetTextParameter( unsigned int index, const char* value )
 {
 	if( index != PT_FILE )
 		return FF_FAIL;
@@ -263,7 +263,7 @@ FFResult RasterizerPlugin::SetTextParameter( unsigned int index, const char* val
 	return FF_SUCCESS;
 }
 
-char* RasterizerPlugin::GetTextParameter( unsigned int index )
+char* BurinPlugin::GetTextParameter( unsigned int index )
 {
 	std::lock_guard< std::mutex > lock( textMutex_ );
 
@@ -277,7 +277,7 @@ char* RasterizerPlugin::GetTextParameter( unsigned int index )
 	return textReturn_;
 }
 
-void RasterizerPlugin::ApplyPreset( int presetIndex )
+void BurinPlugin::ApplyPreset( int presetIndex )
 {
 	if( presetIndex < 0 || presetIndex >= presets::kPresetCount )
 		return;
@@ -310,7 +310,7 @@ void RasterizerPlugin::ApplyPreset( int presetIndex )
 //---------------------------------------------------------------------------
 // Content
 //---------------------------------------------------------------------------
-void RasterizerPlugin::ReloadDocument()
+void BurinPlugin::ReloadDocument()
 {
 	std::string path;
 	{
@@ -349,7 +349,7 @@ void RasterizerPlugin::ReloadDocument()
 		document_ = std::move( fresh );
 }
 
-bool RasterizerPlugin::LoadDocumentString( const std::string& text, const std::string& name )
+bool BurinPlugin::LoadDocumentString( const std::string& text, const std::string& name )
 {
 	raster_.Invalidate();
 	plan_.Invalidate();
@@ -366,7 +366,7 @@ bool RasterizerPlugin::LoadDocumentString( const std::string& text, const std::s
 //---------------------------------------------------------------------------
 // Clock
 //---------------------------------------------------------------------------
-void RasterizerPlugin::UpdateClock( double hostTime )
+void BurinPlugin::UpdateClock( double hostTime )
 {
 	if( forcedSeconds_ )
 		return;
@@ -388,7 +388,7 @@ void RasterizerPlugin::UpdateClock( double hostTime )
 	hostSeconds_ = raw * ( clockScale_ == 0.0 ? 1.0 : clockScale_ );
 }
 
-void RasterizerPlugin::SetSecondsForTest( double seconds )
+void BurinPlugin::SetSecondsForTest( double seconds )
 {
 	forcedSeconds_ = true;
 	hostSeconds_   = seconds;
@@ -397,7 +397,7 @@ void RasterizerPlugin::SetSecondsForTest( double seconds )
 //---------------------------------------------------------------------------
 // Reading the controls
 //---------------------------------------------------------------------------
-RasterRequest RasterizerPlugin::BuildRequest( int width, int height ) const
+RasterRequest BurinPlugin::BuildRequest( int width, int height ) const
 {
 	// The clock is the ONLY part of reading the controls that differs between
 	// the two builds -- FFGL has a host clock and a tempo, OFX has a frame
@@ -410,7 +410,7 @@ RasterRequest RasterizerPlugin::BuildRequest( int width, int height ) const
 	return RequestFromParams( params_, width, height, cycles );
 }
 
-ComposeSettings RasterizerPlugin::BuildCompose() const
+ComposeSettings BurinPlugin::BuildCompose() const
 {
 	return ComposeFromParams( params_, isEffect_ );
 }
@@ -418,7 +418,7 @@ ComposeSettings RasterizerPlugin::BuildCompose() const
 //---------------------------------------------------------------------------
 // GL
 //---------------------------------------------------------------------------
-FFResult RasterizerPlugin::InitGL( const FFGLViewportStruct* vp )
+FFResult BurinPlugin::InitGL( const FFGLViewportStruct* vp )
 {
 	// Idempotent, and it has to be: the harness calls it every frame and a host
 	// is entitled to call it twice. Recompiling the shader and generating a
@@ -467,7 +467,7 @@ FFResult RasterizerPlugin::InitGL( const FFGLViewportStruct* vp )
 	return FF_SUCCESS;
 }
 
-bool RasterizerPlugin::UploadRaster()
+bool BurinPlugin::UploadRaster()
 {
 	const RasterPlacement& p = raster_.Placement();
 	if( p.width <= 0 || p.height <= 0 || raster_.Pixels().empty() )
@@ -495,7 +495,7 @@ bool RasterizerPlugin::UploadRaster()
 	return true;
 }
 
-FFResult RasterizerPlugin::ProcessOpenGL( ProcessOpenGLStruct* pGL )
+FFResult BurinPlugin::ProcessOpenGL( ProcessOpenGLStruct* pGL )
 {
 	if( !glReady_ )
 		return FF_FAIL;
@@ -600,7 +600,7 @@ FFResult RasterizerPlugin::ProcessOpenGL( ProcessOpenGLStruct* pGL )
 	return FF_SUCCESS;
 }
 
-FFResult RasterizerPlugin::DeInitGL()
+FFResult BurinPlugin::DeInitGL()
 {
 	shader_.FreeGLResources();
 
@@ -620,4 +620,4 @@ FFResult RasterizerPlugin::DeInitGL()
 	return FF_SUCCESS;
 }
 
-} // namespace rasterizer
+} // namespace burin

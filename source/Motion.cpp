@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace rasterizer
+namespace burin
 {
 namespace
 {
@@ -102,4 +102,4 @@ MotionState SolveMotion( const MotionSettings& settings, double cycles )
 	return out;
 }
 
-} // namespace rasterizer
+} // namespace burin

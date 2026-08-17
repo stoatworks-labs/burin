@@ -2,7 +2,7 @@
 
 #include "Controls.h"
 
-namespace rasterizer
+namespace burin
 {
 /**
     Where the drawing is, and how big, and which way up.
@@ -100,4 +100,4 @@ float WaveValue( Wave wave, double cycles );
 /// converted to seconds without a second code path.
 MotionState SolveMotion( const MotionSettings& settings, double cycles );
 
-} // namespace rasterizer
+} // namespace burin

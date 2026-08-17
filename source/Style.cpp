@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace rasterizer
+namespace burin
 {
 namespace
 {
@@ -185,4 +185,4 @@ void ApplyStyle( const Document& doc, const StyleSettings& style, float deviceSc
 	}
 }
 
-} // namespace rasterizer
+} // namespace burin
