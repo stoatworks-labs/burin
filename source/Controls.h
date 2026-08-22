@@ -106,6 +106,26 @@ enum ParamId : unsigned int
 	// composition refers to — do not shift under existing users.
 	PT_PRESET,
 
+	// -- The Stoatworks About block ------------------------------------------
+	//
+	// One display-only text line, then one button per link the block carries:
+	// the project page, the source, the funding page. A button opens a browser
+	// and stores nothing.
+	//
+	// How many buttons there are is decided by which URLs StoatworksAbout.h
+	// actually holds, so Burin.h static_asserts this run against
+	// `about::kParamCount` -- writing a user guide later adds one, and without
+	// the assert that would silently shift PT_COUNT_ALL and leave the last
+	// button undeclared.
+	//
+	// Last in the enum so no saved composition's parameter ids shift. Note that
+	// PT_COUNT above is a control -- Shape Count -- and PT_COUNT_ALL is the
+	// total; the About run is measured against the latter.
+	PT_ABOUT_TEXT,
+	PT_ABOUT_BUTTON_1,
+	PT_ABOUT_BUTTON_2,
+	PT_ABOUT_BUTTON_3,
+
 	PT_COUNT_ALL
 };
 

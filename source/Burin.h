@@ -2,6 +2,9 @@
 
 #include <FFGLSDK.h>
 
+// After FFGLSDK.h, which is where FFUInt32 comes from.
+#include "StoatworksAboutParams.h"
+
 #include <mutex>
 #include <string>
 #include <vector>
@@ -94,11 +97,28 @@ private:
 	void ApplyPreset( int presetIndex );
 	void ReloadDocument();
 	void UpdateClock( double hostTime );
+
+public:
+	FFResult SetTime( double time ) override;
+
+	void SetClockScaleForTest( double scale );
+	void TickClockForTest();
+	double ClockScaleForTest() const;
+	double HostSecondsForTest() const;
+
+private:
 	bool UploadRaster();
 
 	const bool isEffect_;
 
 	float params_[ PT_COUNT_ALL ] = { 0.0f };
+
+	// The buttons are declared one per link, so the run in Controls.h and the
+	// run the block actually has must agree. They diverge the day somebody
+	// writes a user guide, and this is what says so.
+	static_assert( PT_COUNT_ALL - PT_ABOUT_TEXT == stoatworks::about::kParamCount,
+	               "Controls.h's About run no longer matches StoatworksAbout.h -- "
+	               "add or remove a PT_ABOUT_BUTTON_n to match" );
 
 	//-----------------------------------------------------------------------
 	// Content
@@ -134,6 +154,11 @@ private:
 	double clockBase_    = 0.0;
 	double lastRawTime_  = -1.0;
 	double clockScale_   = 0.0;
+	double lastWallTime_ = -1.0;
+	double wallStart_    = -1.0;
+	int secondsVotes_    = 0;
+	int millisVotes_     = 0;
+	bool hostTimeSeen_   = false;
 	bool forcedSeconds_  = false;
 	bool resetPending_   = false;
 
