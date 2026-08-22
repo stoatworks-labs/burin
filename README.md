@@ -46,16 +46,16 @@ uploaded.
 
 ## Download
 
-**[v0.1.1](https://github.com/stoatworks-labs/burin/releases/tag/v0.1.1)** — prebuilt for macOS and Windows. Pick your platform:
+**[v0.1.2](https://github.com/stoatworks-labs/burin/releases/tag/v0.1.2)** — prebuilt for macOS and Windows. Pick your platform:
 
 <details>
 <summary><b>macOS</b> — Universal (Apple Silicon + Intel)</summary>
 
 | Build | Download | Size |
 | --- | --- | --- |
-| Universal (Apple Silicon + Intel) · .dmg disk image | [`burin-0.1.1-macos-universal.dmg`](https://github.com/stoatworks-labs/burin/releases/download/v0.1.1/burin-0.1.1-macos-universal.dmg) | 907 KB |
-| Universal (Apple Silicon + Intel) · .zip archive | [`burin-macos-universal.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-macos-universal.zip) | 560 KB |
-| Universal (Apple Silicon + Intel) · .zip archive (OpenFX — Resolve, Vegas, Nuke) | [`burin-ofx-macos-universal.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-ofx-macos-universal.zip) | 346 KB |
+| Universal (Apple Silicon + Intel) · .dmg disk image | [`burin-0.1.2-macos-universal.dmg`](https://github.com/stoatworks-labs/burin/releases/download/v0.1.2/burin-0.1.2-macos-universal.dmg) | 918 KB |
+| Universal (Apple Silicon + Intel) · .zip archive | [`burin-macos-universal.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-macos-universal.zip) | 573 KB |
+| Universal (Apple Silicon + Intel) · .zip archive (OpenFX — Resolve, Vegas, Nuke) | [`burin-ofx-macos-universal.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-ofx-macos-universal.zip) | 354 KB |
 
 </details>
 
@@ -64,9 +64,9 @@ uploaded.
 
 | Build | Download | Size |
 | --- | --- | --- |
-| x64 · .exe installer | [`burin-0.1.1-windows-x86_64-setup.exe`](https://github.com/stoatworks-labs/burin/releases/download/v0.1.1/burin-0.1.1-windows-x86_64-setup.exe) | 262 KB |
-| x64 · .zip archive | [`burin-windows-x86_64.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-windows-x86_64.zip) | 314 KB |
-| x64 · .zip archive (OpenFX — Resolve, Vegas, Nuke) | [`burin-ofx-windows-x86_64.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-ofx-windows-x86_64.zip) | 117 KB |
+| x64 · .exe installer | [`burin-0.1.2-windows-x86_64-setup.exe`](https://github.com/stoatworks-labs/burin/releases/download/v0.1.2/burin-0.1.2-windows-x86_64-setup.exe) | 266 KB |
+| x64 · .zip archive | [`burin-windows-x86_64.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-windows-x86_64.zip) | 325 KB |
+| x64 · .zip archive (OpenFX — Resolve, Vegas, Nuke) | [`burin-ofx-windows-x86_64.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-ofx-windows-x86_64.zip) | 122 KB |
 
 </details>
 
