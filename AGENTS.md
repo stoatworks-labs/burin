@@ -340,3 +340,10 @@ by its artboard or by its ink. Those describe the operator's own material, and a
 preset that reached into them would re-crop a logo its designer framed
 deliberately. It also leaves alone the Isolate range (shape 14 of one drawing has
 nothing to do with shape 14 of another), Sync, and Mix.
+
+## Notes
+
+`docs/NOTES.md` carries this repo's working notes — current status, decisions
+already made, and the traps that have actually bitten. Read it before changing
+anything non-obvious. Cross-cutting fleet knowledge lives in
+[fleet-notes](https://github.com/stoatworks-labs/fleet-notes).
