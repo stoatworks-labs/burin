@@ -494,6 +494,7 @@ void BurinPlugin::SetClockScaleForTest( double scale )
 void BurinPlugin::TickClockForTest()
 {
 	UpdateClock( hostTime );
+	UpdateMotionAnchor();
 }
 
 double BurinPlugin::ClockScaleForTest() const
@@ -510,6 +511,51 @@ void BurinPlugin::SetSecondsForTest( double seconds )
 {
 	forcedSeconds_ = true;
 	hostSeconds_   = seconds;
+	UpdateMotionAnchor();
+}
+
+double BurinPlugin::CyclesForTest() const
+{
+	return CurrentCycles();
+}
+
+//---------------------------------------------------------------------------
+void BurinPlugin::UpdateMotionAnchor()
+{
+	const MotionSettings m = MotionFromParams( params_ );
+	const double elapsed   = hostSeconds_ - clockBase_;
+
+	// Beat and Bar are meant to jump -- they re-lock to the transport, which is
+	// the point of them, and Manual ignores Rate entirely. Keep the anchor
+	// following the clock through all three so that returning to Free resumes
+	// rather than leaps.
+	if( m.sync != SyncMode::Free )
+	{
+		anchorSeconds_ = elapsed;
+		anchorRate_    = m.rate;
+		return;
+	}
+
+	// First frame: leave the anchor at elapsed zero, zero cycles. That makes the
+	// expression in BuildRequest identical to MotionClock's Free branch for as
+	// long as nobody touches Rate, which is what keeps every rendered-frame test
+	// and tools/sweep.py measuring the same thing they measured before.
+	if( anchorRate_ < 0.0f )
+	{
+		anchorRate_ = m.rate;
+		return;
+	}
+
+	if( m.rate != anchorRate_ )
+	{
+		// Once per rate change, not once per frame: this carries the exact cycle
+		// count forward rather than integrating it, so a long session cannot
+		// accumulate rounding into a drift. Frame rate still cannot affect where
+		// the drawing sits.
+		cycleAnchor_ += ( elapsed - anchorSeconds_ ) * static_cast< double >( anchorRate_ );
+		anchorSeconds_ = elapsed;
+		anchorRate_    = m.rate;
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -522,10 +568,26 @@ RasterRequest BurinPlugin::BuildRequest( int width, int height ) const
 	// number and no tempo at all -- so it is solved here and everything else is
 	// shared with the OpenFX build through Settings.cpp. See Settings.h for why
 	// that matters more than it looks like it should.
-	const MotionSettings m = MotionFromParams( params_ );
-	const double cycles    = MotionClock( hostSeconds_ - clockBase_, bpm_, barPhase_, m.sync, m.rate, m.phase );
+	return RequestFromParams( params_, width, height, CurrentCycles() );
+}
 
-	return RequestFromParams( params_, width, height, cycles );
+//---------------------------------------------------------------------------
+/// Where the motion has got to, in cycles.
+///
+/// Free is anchored so that moving Rate changes the pace without moving the
+/// drawing -- see UpdateMotionAnchor. Until the operator has touched Rate this
+/// is exactly `elapsed * rate`, which is what MotionClock's Free branch
+/// returns, because the anchor starts at elapsed zero with zero cycles. Every
+/// other mode is the shared pure function, unchanged.
+//---------------------------------------------------------------------------
+double BurinPlugin::CurrentCycles() const
+{
+	const MotionSettings m = MotionFromParams( params_ );
+	const double elapsed   = hostSeconds_ - clockBase_;
+
+	return m.sync == SyncMode::Free
+	       ? cycleAnchor_ + ( elapsed - anchorSeconds_ ) * static_cast< double >( m.rate )
+	       : MotionClock( elapsed, bpm_, barPhase_, m.sync, m.rate, m.phase );
 }
 
 ComposeSettings BurinPlugin::BuildCompose() const
@@ -637,7 +699,14 @@ FFResult BurinPlugin::ProcessOpenGL( ProcessOpenGLStruct* pGL )
 	{
 		clockBase_    = hostSeconds_;
 		resetPending_ = false;
+
+		// Starting again means starting again: a carried-forward cycle count
+		// would survive the reset and leave the drawing wherever it had got to.
+		cycleAnchor_   = 0.0;
+		anchorSeconds_ = 0.0;
 	}
+
+	UpdateMotionAnchor();
 
 	if( contentDirty_ )
 		ReloadDocument();

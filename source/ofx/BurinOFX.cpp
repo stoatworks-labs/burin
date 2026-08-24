@@ -470,6 +470,13 @@ void BurinOFXPlugin::render( const OFX::RenderArguments& args )
 		fps = 25.0;
 	const double seconds = args.time / fps;
 
+	// The plain product, deliberately: the FFGL build anchors its Free-mode
+	// cycle count so that nudging Rate live does not teleport the drawing, and
+	// that anchor is a running carry which needs frames to arrive in order. This
+	// host renders arbitrary times in arbitrary order and can keyframe Rate, so
+	// an anchor here would make a frame depend on which frames happened to be
+	// rendered before it. A pure function of time is the right answer for a
+	// timeline; see Burin.h.
 	const MotionSettings m = MotionFromParams( params );
 	const double cycles    = MotionClock( seconds, 0.0f, 0.0f, m.sync, m.rate, m.phase );
 

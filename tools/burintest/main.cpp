@@ -687,6 +687,82 @@ int TestMotion()
 	return 0;
 }
 
+//---------------------------------------------------------------------------
+/// Prove a Rate change does not move the drawing.
+///
+/// The cycle count either side of the change is read directly rather than
+/// comparing rendered frames: the motion is a sine, and a sine a whole number
+/// of cycles away is the same value, so two frames can match for entirely the
+/// wrong reason. The number says it outright.
+//---------------------------------------------------------------------------
+int TestRate()
+{
+	std::printf( "rate\n" );
+
+	// Slider positions, not cycles per second.
+	const float sliders[] = { 0.10f, 0.95f, 0.00f, 0.80f };
+
+	BurinPlugin plugin( false );
+	plugin.SetClockScaleForTest( 1.0 );//seconds, said out loud rather than inferred
+
+	// An hour in, which is where the old arithmetic hurt most and where a live
+	// operator actually is when they reach for the slider. The clock only ever
+	// goes forwards from here: winding it back between steps would move the
+	// drawing for a reason that has nothing to do with Rate.
+	double seconds = 3600.0;
+	plugin.SetSecondsForTest( seconds );
+
+	// Untouched, the anchor must leave the old expression exactly as it was --
+	// this is what keeps every rendered-frame test and tools/sweep.py measuring
+	// the same thing they measured before. The plugin's own default is asked
+	// for rather than written down here: a test that hard-codes it goes quietly
+	// wrong the day the default moves.
+	{
+		const double want = seconds * static_cast< double >(
+		                                RateFromParam( plugin.GetFloatParameter( PT_RATE ) ) );
+		Check( std::fabs( plugin.CyclesForTest() - want ) < 1e-3, "untouched == seconds * rate" );
+	}
+
+	for( const float slider : sliders )
+	{
+		const double before = plugin.CyclesForTest();
+
+		// The same instant, a new rate: nothing about the clock has moved, so
+		// nothing about the drawing may either.
+		plugin.SetFloatParameter( PT_RATE, slider );
+		plugin.SetSecondsForTest( seconds );
+		Check( std::fabs( plugin.CyclesForTest() - before ) < 1e-3,
+		       "rate -> " + std::to_string( slider ) + " does not move the drawing" );
+
+		// And then it must actually run at the new rate.
+		const double resumed = plugin.CyclesForTest();
+		seconds += 1.0;
+		plugin.SetSecondsForTest( seconds );
+		Check( std::fabs( ( plugin.CyclesForTest() - resumed )
+		                  - static_cast< double >( RateFromParam( slider ) ) ) < 1e-3,
+		       "  and runs at the new rate afterwards" );
+	}
+
+	// Bar sync is deliberately NOT anchored: its contract is that a cycle
+	// boundary lands on the bar line, so it must still be the plain transport
+	// product. If the anchor ever leaks into it, beat sync stops meaning
+	// anything.
+	{
+		BurinPlugin bar( false );
+		bar.SetClockScaleForTest( 1.0 );
+		bar.SetFloatParameter( PT_SYNC, static_cast< float >( SyncMode::Bar ) );
+		bar.SetBeatInfo( 120.0f, 0.25f );//120bpm: a bar is two seconds
+		bar.SetSecondsForTest( 8.0 );
+		const double before = bar.CyclesForTest();
+
+		bar.SetFloatParameter( PT_RATE, 0.95f );
+		bar.SetSecondsForTest( 8.0 );
+		Check( std::fabs( bar.CyclesForTest() - before ) > 1e-3, "Bar sync still re-locks" );
+	}
+
+	return 0;
+}
+
 int TestDoc( const std::string& path )
 {
 	Document doc;
@@ -1400,6 +1476,7 @@ void Usage()
 		"  --style                   fill/stroke separation and isolate\n"
 		"  --reveal                  write-on timing, against Reveal.cpp\n"
 		"  --motion                  clock, waveforms, spin, zoom octaves\n"
+		"  --rate                    a Rate change does not move the drawing\n"
 		"  --gpu [--images]          the shipped class in real GL, and the CPU/GPU mirror\n"
 		"  --presets                 every factory preset, applied through the dropdown\n"
 		"\n"
@@ -1483,6 +1560,8 @@ int main( int argc, char** argv )
 			TestReveal();
 		else if( a == "--motion" )
 			TestMotion();
+		else if( a == "--rate" )
+			TestRate();
 		else if( a == "--gpu" )
 			TestGpu( images );
 		else if( a == "--presets" )
@@ -1507,6 +1586,7 @@ int main( int argc, char** argv )
 			TestStyle();
 			TestReveal();
 			TestMotion();
+			TestRate();
 			TestGpu( images );
 			TestPresets();
 		}

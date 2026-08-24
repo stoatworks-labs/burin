@@ -106,6 +106,13 @@ public:
 	double ClockScaleForTest() const;
 	double HostSecondsForTest() const;
 
+	/// The cycle count the next frame would be drawn at. `--rate` needs it: the
+	/// thing being tested is that a Rate change does NOT move the drawing, and
+	/// reading the count either side of one says so directly, where comparing
+	/// rendered frames would only say the two frames match -- and a sine at a
+	/// whole number of cycles away matches for the wrong reason.
+	double CyclesForTest() const;
+
 private:
 	bool UploadRaster();
 
@@ -152,6 +159,42 @@ private:
 	//-----------------------------------------------------------------------
 	double hostSeconds_  = 0.0;
 	double clockBase_    = 0.0;
+
+	//-----------------------------------------------------------------------
+	// Cycle continuity across a Rate change.
+	//
+	// The drawing stays a pure function of `cycles` -- that is the whole design
+	// and none of it changes here. What changes is only which cycle count a
+	// given clock reading maps to.
+	//
+	// `cycles = seconds * rate` means a rate change moves the count by
+	// `seconds * delta`, and `seconds` is however long the composition has been
+	// open. Nudging Rate an hour in is a jump of hundreds of cycles: the zoom
+	// and the drift both teleport, which is what orrery issue #6 reported once
+	// the 1000x clock bug was out of the way. So remember the count reached so
+	// far and carry on from there at the new rate.
+	//
+	// Free only. Beat and Bar deliberately keep jumping: their contract is that
+	// a cycle boundary lands on the host's grid, and an offset that made a rate
+	// change seamless would slide the motion off the grid it exists to sit on.
+	// Manual is driven entirely by the Phase slider. Nor is any of this in the
+	// OpenFX build: that host renders arbitrary times in arbitrary order and can
+	// keyframe Rate, so a running anchor there would make a frame depend on
+	// which frames were rendered before it.
+	//
+	// Reset clears it along with `clockBase_` -- starting again means starting
+	// again.
+	//-----------------------------------------------------------------------
+	void UpdateMotionAnchor();
+
+	/// Where the motion has got to, in cycles. The one copy of that expression:
+	/// BuildRequest draws from it and CyclesForTest reads it, so the test cannot
+	/// be measuring different arithmetic from the plugin.
+	double CurrentCycles() const;
+
+	double cycleAnchor_   = 0.0; ///< cycles already reached at `anchorSeconds_`
+	double anchorSeconds_ = 0.0; ///< the elapsed reading that count belongs to
+	float anchorRate_     = -1.0f;///< rate in force since then; < 0 until the first frame
 	double lastRawTime_  = -1.0;
 	double clockScale_   = 0.0;
 	double lastWallTime_ = -1.0;
