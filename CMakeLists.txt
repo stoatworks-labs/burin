@@ -43,6 +43,14 @@ endif()
 
 option(BURIN_BUILD_TOOLS "Build the offline render and measurement harness" ON)
 
+# The FFGL plugin, the FFGL SDK submodule and GLEW are one dependency group,
+# and the OpenFX plugin belongs to none of it. Turning this OFF builds the OFX
+# plugin alone, with no GL loader anywhere in the configure -- which is what
+# the Linux job does, because the FFGL SDK has no Linux path, and GLEW would
+# otherwise have to be installed to build something that never calls it.
+option(BURIN_BUILD_FFGL "Build the FFGL plugin (needs the FFGL SDK and, off macOS, GLEW)" ON)
+
+if(BURIN_BUILD_FFGL)
 # ---------------------------------------------------------------------------
 # The Resolume FFGL SDK, as a git submodule pinned to b1afaf9 -- the rev the
 # rest of the fleet pins. See AGENTS.md for what is wrong with it.
@@ -172,6 +180,8 @@ elseif(APPLE)
         CACHE PATH "" FORCE)
 endif()
 
+endif()  # BURIN_BUILD_FFGL
+
 # ---------------------------------------------------------------------------
 # The OpenFX builds — both plugins in one bundle — for Resolve/Nuke/Natron/
 # Vegas. CPU render against the vendored OFX SDK subset under external/openfx
@@ -251,7 +261,9 @@ if(BUILD_OFX)
     endif()
 endif()
 
+if(BURIN_BUILD_FFGL)
 install(TARGETS BurinSource BurinEffect
     LIBRARY DESTINATION "."
     BUNDLE  DESTINATION "."
 )
+endif()  # BURIN_BUILD_FFGL
