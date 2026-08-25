@@ -63,7 +63,9 @@ plugin files are not gated the way `.exe` files are — only the installer trips
 
 ### OpenFX hosts
 
-Copy `Burin.ofx.bundle` into `/Library/OFX/Plugins`.
+Copy `Burin.ofx.bundle` into `/Library/OFX/Plugins` (macOS),
+`C:\Program Files\Common Files\OFX\Plugins` (Windows) or `/usr/OFX/Plugins`
+(Linux).
 
 Unusually for this kind of port, almost nothing is reimplemented: the picture is built by a CPU
 rasteriser in **both** builds — in Resolume the GPU only does the final transform and composite —
