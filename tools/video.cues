@@ -29,7 +29,7 @@
 # Paper, black ink, fitted to its own content. No motion at all for two seconds:
 # the eye needs a reference frame before it can be told anything has changed,
 # and this is also the frame the thumbnail is cut from.
-0.0    Background Opacity=1.0
+0.0    Background Alpha=1.0
 0.0    Background=0.97
 0.0    Background_Green=0.96
 0.0    Background_Blue=0.93

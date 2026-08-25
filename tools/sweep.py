@@ -73,9 +73,9 @@ CONTEXT = {
     "Drift Y":           {},
     "Spin":              {},
 
-    "Background":        {"Background Opacity": 1.0},
-    "Background_Green":  {"Background Opacity": 1.0},
-    "Background_Blue":   {"Background Opacity": 1.0},
+    "Background":        {"Background Alpha": 1.0},
+    "Background_Green":  {"Background Alpha": 1.0},
+    "Background_Blue":   {"Background Alpha": 1.0},
 
     "Shape Count":       {"First Shape": 0},
 
@@ -166,6 +166,15 @@ def main():
         # The name column is fixed width in --list; everything after it is type,
         # default and range.
         names.append(line[5:26].strip())
+
+    # The About block is a text field and browser buttons, declared last. They
+    # never touch a pixel, so sweeping them only buries a real dead control.
+    # Truncating at "About" rather than naming each button keeps this correct
+    # when a link is added -- writing the user guide added a fourth button.
+    for i, name in enumerate(names):
+        if name == "About":
+            names = names[:i]
+            break
 
     if not names:
         print("could not read the parameter list")

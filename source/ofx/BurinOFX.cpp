@@ -107,7 +107,7 @@ const ParamName kParams[] = {
 	{ PT_ROTATE, "rotate", "Rotate" },
 	{ PT_SPIN, "spin", "Spin" },
 	{ PT_OPACITY, "opacity", "Opacity" },
-	{ PT_BACK_OPACITY, "backOpacity", "Background Opacity" },
+	{ PT_BACK_OPACITY, "backOpacity", "Background Alpha" },
 	{ PT_MIX, "mix", "Mix" },
 };
 constexpr int kParamNameCount = static_cast< int >( sizeof( kParams ) / sizeof( kParams[ 0 ] ) );
@@ -235,7 +235,7 @@ void DescribeParams( OFX::ImageEffectDescriptor& desc, bool isEffect )
 		b->setDefault( 0.0, 0.0, 0.0 );
 		page->addChild( *b );
 	}
-	MakeDouble( desc, page, "backOpacity", "Background Opacity", defaults[ PT_BACK_OPACITY ] );
+	MakeDouble( desc, page, "backOpacity", "Background Alpha", defaults[ PT_BACK_OPACITY ] );
 
 	if( isEffect )
 		MakeDouble( desc, page, "mix", "Mix", defaults[ PT_MIX ] );
