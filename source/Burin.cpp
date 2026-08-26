@@ -49,6 +49,28 @@ BurinPlugin::BurinPlugin( bool isEffect ) :
 		SetMinInputs( 0 ), SetMaxInputs( 0 );
 
 	//-----------------------------------------------------------------------
+	// Defaults, BEFORE a single parameter is declared. Every one is in
+	// host-facing 0..1 space; the physical values come out of Controls.cpp.
+	//
+	// ☠️ The order is the whole thing. `SetParamInfof` is the SDK's short form
+	// and it takes the default from `GetFloatParameter( index )` -- that is,
+	// from `params_`, right then. This call used to sit AFTER every
+	// declaration, so each one captured the zero-initialised array and the
+	// plugin published a default of 0 for every ranged control it has,
+	// Opacity and Mix included. The internal state was then corrected a
+	// moment later, which is why nothing offline noticed: the plugin's own
+	// harness reads `params_` and sees the right numbers.
+	//
+	// A host does not. Resolume showed every slider at 0 and pushed 0 back in,
+	// so the source drew nothing and the effect passed the clip through
+	// untouched -- a black screen and an effect that "does nothing", which is
+	// exactly how it was reported in #1. `PT_REVEAL` is the clearest tell: it
+	// is set to 1.0 below and commented "finished, so a fresh instance draws",
+	// and a fresh instance did not draw.
+	//-----------------------------------------------------------------------
+	DefaultParams( params_ );
+
+	//-----------------------------------------------------------------------
 	// Document
 	//-----------------------------------------------------------------------
 	{
@@ -173,12 +195,6 @@ BurinPlugin::BurinPlugin( bool isEffect ) :
 	SetParamElementInfo( PT_PRESET, 0, "Custom", 0.0f );
 	for( int i = 0; i < presets::kPresetCount; ++i )
 		SetParamElementInfo( PT_PRESET, i + 1, presets::kPresets[ i ].name, static_cast< float >( i + 1 ) );
-
-	//-----------------------------------------------------------------------
-	// Defaults. Every one of these is in host-facing 0..1 space; the physical
-	// values come out of Controls.cpp.
-	//-----------------------------------------------------------------------
-	DefaultParams( params_ );
 
 	// Groups. SetParamGroup collapses RUNS of same-group parameters, so the
 	// declaration order above is what holds these together -- reordering an id
