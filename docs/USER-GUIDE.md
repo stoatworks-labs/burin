@@ -171,6 +171,12 @@ a rebuild. **Detail** below 1× is the lever if a heavy drawing costs too much a
 
 ## If it looks wrong
 
+**Every slider is at zero and nothing draws, on v0.1.5 or earlier.** That is a bug, fixed in
+v0.1.6. Those builds told the host that every control's default was 0 — Opacity included — so the
+source came up black and the effect passed the clip through untouched, no matter what drawing you
+picked. Update, or drag Opacity up and carry on. The log looks perfectly healthy in this state,
+because as far as the plugin is concerned it was asked for nothing.
+
 **The layer is empty and nothing errored.** Almost certainly live text. Check the log; it counts
 what it had to skip.
 
@@ -193,7 +199,9 @@ that is the one thing this plugin exists to get right.
 One log, both builds. No crash handler — this runs inside somebody else's process.
 
 ```
-~/Library/Logs/burin/burin.YYYY-MM-DD.log
+~/Library/Logs/burin/burin.YYYY-MM-DD.log          macOS
+%LOCALAPPDATA%\burin\logs\burin.YYYY-MM-DD.log     Windows
+~/.local/state/burin/logs/burin.YYYY-MM-DD.log     Linux
 ```
 
 It covers the failures that look identical from outside: a file that would not open or parse, a
