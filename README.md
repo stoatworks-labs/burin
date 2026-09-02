@@ -46,14 +46,14 @@ uploaded.
 
 ## Download
 
-**[v0.1.6](https://github.com/stoatworks-labs/burin/releases/tag/v0.1.6)** — prebuilt for macOS, Windows and Linux. Pick your platform:
+**[v0.1.7](https://github.com/stoatworks-labs/burin/releases/tag/v0.1.7)** — prebuilt for macOS, Windows and Linux. Pick your platform:
 
 <details>
 <summary><b>macOS</b> — Universal (Apple Silicon + Intel)</summary>
 
 | Build | Download | Size |
 | --- | --- | --- |
-| Universal (Apple Silicon + Intel) · .dmg disk image | [`burin-0.1.6-macos-universal.dmg`](https://github.com/stoatworks-labs/burin/releases/download/v0.1.6/burin-0.1.6-macos-universal.dmg) | 638 KB |
+| Universal (Apple Silicon + Intel) · .dmg disk image | [`burin-0.1.7-macos-universal.dmg`](https://github.com/stoatworks-labs/burin/releases/download/v0.1.7/burin-0.1.7-macos-universal.dmg) | 638 KB |
 | Universal (Apple Silicon + Intel) · .zip archive | [`burin-macos-universal.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-macos-universal.zip) | 574 KB |
 | Universal (Apple Silicon + Intel) · .zip archive (OpenFX — Resolve, Vegas, Nuke) | [`burin-ofx-macos-universal.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-ofx-macos-universal.zip) | 354 KB |
 
@@ -64,7 +64,7 @@ uploaded.
 
 | Build | Download | Size |
 | --- | --- | --- |
-| x64 · .exe installer | [`burin-0.1.6-windows-x86_64-setup.exe`](https://github.com/stoatworks-labs/burin/releases/download/v0.1.6/burin-0.1.6-windows-x86_64-setup.exe) | 274 KB |
+| x64 · .exe installer | [`burin-0.1.7-windows-x86_64-setup.exe`](https://github.com/stoatworks-labs/burin/releases/download/v0.1.7/burin-0.1.7-windows-x86_64-setup.exe) | 274 KB |
 | x64 · .zip archive | [`burin-windows-x86_64.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-windows-x86_64.zip) | 325 KB |
 | x64 · .zip archive (OpenFX — Resolve, Vegas, Nuke) | [`burin-ofx-windows-x86_64.zip`](https://github.com/stoatworks-labs/burin/releases/latest/download/burin-ofx-windows-x86_64.zip) | 122 KB |
 
