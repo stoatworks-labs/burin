@@ -37,7 +37,7 @@ static CFFGLPluginInfo PluginInfo(
 	0,                                                   // Plugin major version number
 	1,                                                   // Plugin minor version number
 	FF_SOURCE,                                           // Plugin type
-	"Vector artwork, rasterised at the size it is seen",  // Plugin description
+	"Vector artwork, rasterised at the size it is seen.\n\nPoint it at an SVG and it draws it at the resolution the frame actually needs, rebuilding whenever that changes. A bitmap zoomed eight times is eight times blurrier; this is not, because it is re-rasterised rather than scaled.\n\nRe-rasterising a thousand paths every frame is not something a VJ rig can afford, so the scale is snapped to a ladder half an octave apart and the drawing is rebuilt only when the rung changes. It always snaps up, never to the nearest rung - which is the difference between sharp and usually sharp.\n\nStart from a Preset, at the bottom.",// Plugin description
 	"Burin FFGL source"                             // About
 );
 
