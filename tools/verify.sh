@@ -28,6 +28,94 @@ fail() { printf '  FAIL  %s\n' "$1"; FAILED=1; }
 head() { printf '\n%s\n' "$1"; }
 
 #---------------------------------------------------------------------------
+# Every shader, through a real GLSL compiler, before a host has to find out.
+#
+# A shader that will not compile presents to an operator as "the effect does
+# nothing", with the real message buried in the diagnostics log -- so without
+# this it is caught at run time, in a host, or not at all.
+#
+# --target-env=opengl4.5 with -fauto-map-locations: glslc targets SPIR-V, which
+# demands an explicit layout( location ) on every uniform and varying. Those are
+# Vulkan rules and not GLSL ones, and without the flag every shader "fails" for
+# reasons that have nothing to do with the code.
+#
+# glslc is optional -- `brew install shaderc` -- so a machine without it skips
+# rather than fails.
+#---------------------------------------------------------------------------
+shaders_compile() {
+	local dir bad=0 n=0 shader
+
+	if ! command -v glslc >/dev/null 2>&1; then
+		printf '   skipped: glslc not installed (brew install shaderc)\n'
+		return 0
+	fi
+
+	dir="$( mktemp -d )"
+
+	python3 - "$dir" <<'SHADERS_PY'
+import re, sys, pathlib
+out = pathlib.Path( sys.argv[ 1 ] )
+text = pathlib.Path( "source/Shaders.cpp" ).read_text()
+
+# kVertexShader is a plain constant. The fragment shader is accumulated in
+# FragmentShader( bool isEffect ): a base, two chunks only the effect build
+# gets, and a tail. Both builds ship, so both are compiled here -- and the
+# effect-only chunks are exactly where a shader breaks in one build alone.
+chunks = []
+for m in re.finditer( r'source\s*\+?=\s*R"\((.*?)\)"', text, re.S ):
+	guarded = re.search( r'if\s*\(\s*isEffect\s*\)$', text[ : m.start() ].rstrip() )
+	chunks.append( ( guarded is not None, m.group( 1 ) ) )
+
+def emit( name, body ):
+	# The vertex shader is the one that writes gl_Position; everything else is a
+	# fragment shader. glslc takes the stage from the extension.
+	ext = ".vert" if re.search( r"\bgl_Position\s*=", body ) else ".frag"
+	( out / ( name + ext ) ).write_text( body )
+
+emit( "kVertexShader",
+      re.search( r'kVertexShader\s*=\s*R"\((.*?)\)"', text, re.S ).group( 1 ) )
+for label, isEffect in ( ( "source", False ), ( "effect", True ) ):
+	emit( "FragmentShader_" + label,
+	      "".join( g for only, g in chunks if isEffect or not only ) )
+SHADERS_PY
+
+	for shader in "$dir"/*.vert "$dir"/*.frag; do
+		[ -e "$shader" ] || continue
+		n=$(( n + 1 ))
+		if ! glslc --target-env=opengl4.5 -fauto-map-locations \
+			   "$shader" -o /dev/null 2>"$dir/err"; then
+			printf '   %s does not compile\n' "$( basename "$shader" )"
+			sed "s|$dir/||; s|^|      |" "$dir/err"
+			bad=$(( bad + 1 ))
+		fi
+	done
+
+	if [ "$n" -eq 0 ]; then
+		# No shaders at all is a FAILURE, not a pass. It means the extraction
+		# above has lost track of where this repo keeps its GLSL, and a check
+		# that silently looks at nothing is worse than no check.
+		printf '   no shaders were extracted -- the extraction has gone stale\n'
+		rm -rf "$dir"
+		return 1
+	fi
+
+	if [ "$bad" -eq 0 ]; then
+		printf '   %d shaders, all compile\n' "$n"
+	fi
+	rm -rf "$dir"
+	return "$bad"
+}
+
+#---------------------------------------------------------------------------
+head "shaders"
+#---------------------------------------------------------------------------
+if shaders_compile; then
+	pass "every shader compiles"
+else
+	fail "a shader does not compile"
+fi
+
+#---------------------------------------------------------------------------
 head "build"
 #---------------------------------------------------------------------------
 ARCHFLAG=()
