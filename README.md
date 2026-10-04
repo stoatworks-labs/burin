@@ -217,6 +217,13 @@ implementations were kept in step.
 Sync offers Free and Manual only: an OFX host carries no tempo. Manual is the
 mode for keyframing Phase against the edit.
 
+**Fusion reports no frame rate; there, time-based controls assume 24 fps.**
+Resolve's Fusion page gives an OpenFX plugin no frame rate at all, and the first
+OpenFX builds failed every render there. Now Burin falls back to 24, Resolve's
+default timeline rate, so in Fusion the motion runs as if the composition were 24
+fps whatever its real rate. A host that reports a rate, Resolve's Edit page
+included, gets its own.
+
 ## Build
 
 - CMake ≥ 3.15, a C++17 compiler.
