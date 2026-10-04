@@ -30,10 +30,10 @@
 /// the edit, and it is the one mode that behaves identically in both builds.
 ///
 /// **OFX hands render time in frames.** The clip's frame rate turns it into the
-/// seconds `MotionClock` wants. A host that reports no frame rate gets 24,
-/// Resolve's default timeline rate, which is wrong somewhere but is never
-/// zero -- and Resolve's own Fusion page is such a host: it reports none,
-/// so there Speed and Rate run as if the timeline were 24 fps.
+/// seconds `MotionClock` wants: the output clip's, the source clip's or the
+/// effect's (Resolve's Fusion page reports it only on the effect). A host
+/// that reports none anywhere gets 24, Resolve's default timeline rate,
+/// which is wrong somewhere but is never zero.
 ///
 /// **Rendering is not tiled.** `setSupportsTiles(false)` on both clips. The
 /// raster is built for the whole frame's transform in one go and a tile would
@@ -257,17 +257,17 @@ void DescribeParams( OFX::ImageEffectDescriptor& desc, bool isEffect )
 	stoatworks::about::ofx::describe( desc, page );
 }
 
-/// The frame rate when the host reports none: 24, Resolve's default timeline
-/// rate. Resolve's Fusion page reports no frame rate anywhere.
+/// The frame rate when the host reports none anywhere: 24, Resolve's default
+/// timeline rate.
 constexpr double kFallbackFrameRate = 24.0;
 
 /// OFX time is in frames. This is the first positive, finite frame rate the
 /// host gives -- the output clip's, the source clip's, the effect's -- else
 /// kFallbackFrameRate. Each read is its own try: Resolve's Fusion page gives
-/// kOfxImageEffectPropFrameRate on neither the effect nor any clip, the
-/// Support library throws on a property the host lacks, and a throw out of
-/// render fails the render -- in Fusion, a composition that "could not be
-/// processed successfully".
+/// kOfxImageEffectPropFrameRate on the effect but on no clip, the Support
+/// library throws on a property the host lacks, and a throw out of render
+/// fails the render -- in Fusion, a composition that "could not be processed
+/// successfully". There the effect's rate, the timeline's, is the one used.
 double framesPerSecond( const OFX::ImageEffect& effect, const OFX::Clip* output, const OFX::Clip* source )
 {
 	const auto usable = []( double rate ) { return std::isfinite( rate ) && rate > 0.0; };
@@ -522,9 +522,9 @@ void BurinOFXPlugin::render( const OFX::RenderArguments& args )
 	ReadParams( args.time, params );
 
 	// OFX hands render time in FRAMES. The clip's frame rate turns it into the
-	// seconds MotionClock wants; a host reporting none -- Resolve's Fusion page
-	// -- gets 24, which is wrong somewhere but is never zero and never a
-	// division by it. See framesPerSecond.
+	// seconds MotionClock wants; a host reporting none anywhere gets 24, which
+	// is wrong somewhere but is never zero and never a division by it. See
+	// framesPerSecond.
 	const double seconds = args.time / framesPerSecond( *this, dstClip_, srcClip_ );
 
 	// The plain product, deliberately: the FFGL build anchors its Free-mode
@@ -652,7 +652,9 @@ void DescribeCommon( OFX::ImageEffectDescriptor& desc, const char* label )
 		"along their own length; recolour, isolate and animate.\n\n"
 		"SVG only. Text must be converted to outlines: live <text> is not "
 		"rendered.\n\n"
-		"Fusion reports no frame rate; there, time-based controls assume 24 fps." );
+		"Resolve's Fusion page reports the frame rate on the effect but not on its "
+		"clips; the plugin reads the effect's, and assumes 24 fps only where a host "
+		"reports none." );
 
 	desc.addSupportedBitDepth( OFX::eBitDepthUByte );
 	desc.addSupportedBitDepth( OFX::eBitDepthFloat );
