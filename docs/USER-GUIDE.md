@@ -18,9 +18,10 @@ shown.*
 > agree bit-exactly, which is what keeps Resolume and Resolve honest against each other, and 37
 > parameters are swept end to end.
 >
-> **Both FFGL plugins load and render in Resolume Arena.** The OpenFX build has **not** been
-> loaded into Resolve, Nuke or Natron. Still open even in Arena: whether the twice-an-octave
-> rebuild during a continuous zoom is visible in a room.
+> **Both FFGL plugins load and render in Resolume Arena.** The OpenFX build renders on Resolve's
+> Fusion page from v0.1.10, which fixed every render failing there; it has **not** been tried on
+> Resolve's other pages, or in Nuke or Natron. Still open even in Arena: whether the
+> twice-an-octave rebuild during a continuous zoom is visible in a room.
 >
 > This codebase was created with AI assistance, directed and reviewed by a human author.
 

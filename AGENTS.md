@@ -298,11 +298,14 @@ and `ProcessOpenGL` survive a real host's call sequence, and that a drawing
 appears. It is **not** a sweep of the controls in a live host, and the questions
 below were not part of it.
 
-**The OpenFX build has still not been loaded into Resolve, Nuke or Natron.** It
-builds, exports `OfxGetPlugin` and passes the signing checks in `verify.sh`,
-which is exactly as far as flipbook's got before release too. A generator's
-`render` in particular runs only in a real host — `ofxprobe` drives the Filter
-context only.
+**The OpenFX build has been run only on Resolve's Fusion page.** From v0.1.10
+(the frame-rate guard and the frame-varying flag) both plugins render there as
+tools in DaVinci Resolve Studio 21.1 on macOS (2026-10-04): Burin as a generator,
+whose frames 20-22 move, and Burin Over fed by a MediaIn. Earlier builds failed
+every frame there. That is a render, not a sweep of the controls; Resolve's other
+pages, Nuke and Natron are untried. Otherwise it builds, exports `OfxGetPlugin`
+and passes the signing checks in `verify.sh`. A generator's `render` in
+particular runs only in a real host — `ofxprobe` drives the Filter context only.
 
 Still worth checking, and unaffected by the Arena confirmation:
 

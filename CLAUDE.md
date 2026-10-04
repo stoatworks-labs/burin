@@ -37,8 +37,9 @@ anything that writes into an `NSVGshape`.
 - Sync offers Free and Manual only: OFX hosts carry no tempo. The two-entry
   dropdown is translated to the shared four-entry enum in `ReadParams` — an index
   passed through would select a mode with no clock behind it.
-- OFX time arrives in *frames*; the plugin divides by the clip frame rate to get
-  the seconds `MotionClock` wants.
+- OFX time arrives in *frames*; the plugin divides by `framesPerSecond()` (output
+  clip, source clip, effect, else 24 — Fusion reports the rate on the effect
+  only) to get the seconds `MotionClock` wants.
 - Smoke test (ofxprobe drives the Filter context; the generator's render runs
   only in a real host). **`--set-string` is required** — without a drawing, every
   numeric setting is measuring an empty frame that renders perfectly and draws
